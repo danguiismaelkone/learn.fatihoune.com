@@ -8,6 +8,8 @@
   --accent:         oklch(0.683 0.185 44.0);  /* #F26A21 orange — aplats, traits, grands chiffres. JAMAIS en petit texte */
   --accent-strong:  oklch(0.538 0.154 42.3);  /* #B4470F variante texte (5,46:1 blanc) */
   --surface-warm:   oklch(0.971 0.017 56.2);  /* #FFF3EB fond chaud de charte */
+  --tint-red:       oklch(0.955 0.025 20);    /* #FDE9EA teinte claire du rouge principal (tuiles de chiffres) */
+  --tint-orange:    oklch(0.955 0.03 55);     /* #FDEBDC teinte claire de l'orange (tuiles de chiffres) */
   --ink:            oklch(0.273 0.019 248.5); /* #202830 texte principal de charte */
   --white:          oklch(1 0 0);             /* #FFFFFF */
   /* --- Neutres dérivés de la teinte chaude de la marque (hue ~50) --- */
@@ -267,9 +269,22 @@ button.header__search{background:var(--white);cursor:pointer}
 .doors a{display:block;padding:var(--s-5) 0;border-bottom:var(--border);text-decoration:none}
 .doors a:hover .heading{color:var(--primary-strong)}
 .callout{background:var(--surface-warm);border-left:4px solid var(--accent);padding:var(--s-5)}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,9rem),1fr));gap:var(--s-4);list-style:none;margin:0;padding:0}
-.stat__value{display:block;font-size:2.5rem;line-height:1;font-weight:var(--fw-bold);color:var(--accent);font-variant-numeric:tabular-nums}
-.stat__label{font-size:var(--step--1)}
+/* Key figures as tinted tiles (Cegos-style), cycling through brand tints: red, orange, peach */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,12rem),1fr));gap:var(--s-3);list-style:none;margin:0;padding:0}
+.stats li{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--s-2);text-align:center;padding:var(--s-5) var(--s-4);border-radius:var(--radius);background:var(--tint-red)}
+.stats li:nth-child(3n+2){background:var(--tint-orange)}
+.stats li:nth-child(3n+3){background:var(--surface-warm)}
+.stat__value{display:block;font-size:clamp(2rem,1.6rem + 1.5vw,2.75rem);line-height:1;font-weight:var(--fw-bold);color:var(--primary-strong);font-variant-numeric:tabular-nums;letter-spacing:var(--tracking-title)}
+.stats li:nth-child(3n+2) .stat__value{color:var(--accent-strong)}
+.stats li:nth-child(3n+3) .stat__value{color:var(--ink)}
+.stat__label{font-size:var(--step--1);color:var(--ink);max-width:22ch}
+/* Trust wall: centred names or logos, no borders */
+.trust-wall{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;justify-content:center;gap:var(--s-5) var(--s-6)}
+.trust-wall li{flex:0 1 13rem;display:flex;align-items:center;justify-content:center;min-height:64px;text-align:center}
+.trust-wall span{font-weight:var(--fw-bold);font-size:var(--step-0);line-height:1.3;color:var(--ink);letter-spacing:-.01em}
+.trust-wall img{max-height:56px;max-width:100%;width:auto;object-fit:contain}
+.trust__cta{display:flex;justify-content:center}
+@media (max-width:599px){.trust-wall{gap:var(--s-4) var(--s-3)}.trust-wall li{flex-basis:calc(50% - var(--s-3) / 2);min-height:56px}.trust-wall span{font-size:var(--step--1)}}
 .clients{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));border-top:var(--border);border-left:var(--border);list-style:none;margin:0;padding:0}
 .clients li{border-right:var(--border);border-bottom:var(--border);padding:var(--s-3);font-size:var(--step--1);min-height:84px;display:flex;flex-direction:column;justify-content:flex-end;gap:4px;background:var(--white)}
 .clients img{max-height:40px;width:auto;margin-bottom:auto;object-fit:contain}
