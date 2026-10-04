@@ -7,7 +7,9 @@ import { TRAINING_BADGES, TRAINING_BADGE_LABELS, slugify } from '../lib/training
 
 /** Slug from the title when empty; suffixed (-2, -3…) if another training already uses it. */
 const uniqueSlug: FieldHook = async ({ value, data, originalDoc, req }) => {
-  const base = slugify((value as string | undefined) || (data?.title as string | undefined) || '')
+  // On update, `data` may hold only the changed fields: fall back to the stored title.
+  const source = (value as string | undefined)?.trim() || (data?.title as string | undefined) || (originalDoc?.title as string | undefined) || ''
+  const base = slugify(source)
   if (!base) return value
   let candidate = base
   for (let n = 2; n < 50; n++) {
