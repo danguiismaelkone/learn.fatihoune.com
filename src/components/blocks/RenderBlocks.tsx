@@ -64,7 +64,9 @@ async function DomainIndex({ title, ctx }: { title: string; ctx: Ctx }) {
                 return (
                   <li key={t.id}>
                     <span>
-                      {t.title}
+                      {t.detailPublished && t.slug ? (
+                        <Link className="themes__title-link" href={`/formations/${domain.slug}/${t.slug}`}>{t.title}</Link>
+                      ) : t.title}
                       <Link className="themes__domain" href={`/formations/${domain.slug}`}>{domain.title}</Link>
                     </span>
                     <span className="themes__duration">{t.durationLabel ?? ''}</span>
