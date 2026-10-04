@@ -79,9 +79,7 @@ button,input,textarea,select{font:inherit;color:inherit}
 .section{padding-block:var(--section-y)}
 .section--white{background:var(--white)}
 .section--warm{background:var(--surface-warm)}
-.section--ink{background:var(--ink);color:var(--white);padding-bottom:0}
-.section--ink .heading{color:var(--white)}
-.section--ink .link{color:var(--white)}
+.section:has(.domain-chips__band){padding-bottom:0} /* the motif band closes the domain index section */
 .section--ruled{border-top:var(--rule)}
 .section--tight{padding-block:var(--s-6)}
 .stack{display:flex;flex-direction:column;gap:var(--s-4)}
@@ -241,9 +239,9 @@ button.header__search{background:var(--white);cursor:pointer}
 .index__count::after{content:" ›";color:var(--primary)}
 /* Home: domains as numbered white tiles on ink, then the ivorian band */
 .domain-chips{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,17rem),1fr));gap:var(--s-2)}
-.domain-chips a{display:grid;grid-template-columns:2em minmax(0,1fr) auto;gap:var(--s-2);align-items:baseline;height:100%;padding:var(--s-3) var(--s-4);background:var(--white);color:var(--ink);border-radius:var(--radius);text-decoration:none;font-weight:var(--fw-bold);transition:background var(--dur) var(--ease)}
-.domain-chips a:hover{background:var(--surface-warm)}
-.domain-chips a:focus-visible{outline:2px solid var(--white);outline-offset:2px}
+.domain-chips a{display:grid;grid-template-columns:2em minmax(0,1fr) auto;gap:var(--s-2);align-items:baseline;height:100%;padding:var(--s-3) var(--s-4);background:var(--white);color:var(--ink);border:var(--border);border-top:3px solid var(--primary);border-radius:var(--radius);text-decoration:none;font-weight:var(--fw-bold);transition:background var(--dur) var(--ease),border-color var(--dur) var(--ease)}
+.domain-chips a:hover{background:var(--surface-warm);border-color:var(--ink);border-top-color:var(--primary)}
+.domain-chips a:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 .domain-chips__count{font-variant-numeric:tabular-nums;color:var(--ink-soft);font-size:var(--step--1);font-weight:var(--fw-regular)}
 .domain-chips__count::after{content:" ›";color:var(--primary)}
 .domain-chips__band{height:12px;margin-top:var(--section-y)}
