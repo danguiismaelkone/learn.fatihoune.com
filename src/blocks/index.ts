@@ -101,6 +101,10 @@ export const ListBlock: Block = {
       { name: 'strong', label: 'Début en gras (facultatif)', type: 'text' },
       { name: 'text', label: 'Texte', type: 'text', required: true },
     ] },
+    { name: 'style', label: 'Présentation', type: 'select', defaultValue: 'bullets', options: [
+      { label: 'Liste à puces', value: 'bullets' },
+      { label: 'Colonnes numérotées (arguments)', value: 'pillars' },
+    ] },
   ],
 }
 

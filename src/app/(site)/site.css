@@ -225,6 +225,16 @@ button.header__search{background:var(--white);cursor:pointer}
 .callback__inner{display:grid;gap:var(--s-5)}
 .callback__form{display:grid;gap:var(--s-4);align-items:start}
 .callback .alert{align-self:start}
+.callback__form--compact{grid-template-columns:repeat(auto-fit,minmax(min(100%,12rem),1fr))}
+/* Closing contact block: page CTA on the left, callback form on the right (replaces the global callback) */
+main:has([data-closing]) ~ .callback{display:none}
+.closing__inner{display:grid;gap:var(--s-6);align-items:start}
+.closing__callback{background:var(--white);border:var(--border);border-top:var(--rule);border-radius:var(--radius);padding:var(--s-5)}
+/* « Pourquoi nous » as numbered columns */
+.pillars{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,16rem),1fr));gap:var(--s-5) var(--s-6)}
+.pillars li{display:flex;flex-direction:column;gap:var(--s-2);padding-top:var(--s-4);border-top:1px solid var(--ink)}
+.pillars__num{font-size:2.5rem;line-height:1;font-weight:var(--fw-bold);color:var(--accent);font-variant-numeric:tabular-nums}
+.pillars .heading{margin:0}
 
 /* ===== Home ===== */
 .hero{display:grid;grid-template-columns:24px minmax(0,1fr);gap:var(--s-4);padding-block:var(--s-6)}
@@ -262,9 +272,6 @@ button.header__search{background:var(--white);cursor:pointer}
 .course-card__icon{width:18px;height:18px;flex:none}
 .course-card__foot{margin-top:auto;padding-top:var(--s-3);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--s-3)}
 .course-card__price{font-size:var(--step--1);font-weight:var(--fw-bold);color:var(--ink-soft)}
-.visit{display:grid;gap:var(--s-4)}
-.visit__card{font-style:normal;display:flex;flex-direction:column;gap:var(--s-2);border-left:4px solid var(--accent);padding-left:var(--s-4)}
-.visit__address{white-space:pre-line;font-weight:var(--fw-bold);font-size:var(--step-1)}
 /* Home « Ce que nous faisons » : cartes avec photo (proposition A, 2026-10-04) */
 .photo-cards{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,16rem),1fr));gap:var(--s-5)}
 .photo-card{display:flex;flex-direction:column;height:100%;background:var(--white);border:var(--border);border-top:var(--rule);border-radius:var(--radius);overflow:hidden;text-decoration:none;color:var(--ink)}
@@ -450,10 +457,12 @@ a.card:hover{border-color:var(--ink)}
   .callback__inner{grid-template-columns:var(--col-side) var(--col-main);gap:var(--s-6)}
   .callback__form{grid-template-columns:repeat(3,minmax(0,1fr))}
   .callback__full{grid-column:1/-1}
+  .closing__inner{grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:var(--s-7)}
+  .callback__form--compact{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .callback__form--compact .callback__slot{grid-column:1/-1}
   .only-desktop{display:block}
   .only-mobile{display:none}
   .with-aside{grid-template-columns:var(--col-main) var(--col-side)}
-  .visit{grid-template-columns:var(--col-side) var(--col-main);align-items:start}
   .aside{display:block;position:sticky;top:132px;align-self:start}
   .tabs{--header-h:115px}
   .with-tabs .aside{top:180px}
@@ -465,4 +474,4 @@ a.card:hover{border-color:var(--ink)}
   .footer__cols{grid-template-columns:2fr 1fr 1fr 1fr}
   .contact-layout{display:grid;grid-template-columns:var(--col-main) var(--col-side);gap:var(--s-6);align-items:start}
 }
-@media print{.header,.footer,.wa-float,.sticky-cta,.to-top,.callback{display:none}}
+@media print{.header,.footer,.wa-float,.sticky-cta,.to-top,.callback,.closing__callback{display:none}}

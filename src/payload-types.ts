@@ -479,6 +479,7 @@ export interface Page {
               id?: string | null;
             }[]
           | null;
+        style?: ('bullets' | 'pillars') | null;
         id?: string | null;
         blockName?: string | null;
         blockType: 'list';
@@ -920,6 +921,7 @@ export interface PagesSelect<T extends boolean = true> {
                     text?: T;
                     id?: T;
                   };
+              style?: T;
               id?: T;
               blockName?: T;
             };

@@ -8,6 +8,7 @@ import * as migration_20261004_142608_lot5_training_detail from './20261004_1426
 import * as migration_20261004_150246_training_image from './20261004_150246_training_image';
 import * as migration_20261004_181542_navigation_search from './20261004_181542_navigation_search';
 import * as migration_20261004_190657_home_photo_cards_band from './20261004_190657_home_photo_cards_band';
+import * as migration_20261004_191542_list_style from './20261004_191542_list_style';
 
 export const migrations = [
   {
@@ -58,6 +59,11 @@ export const migrations = [
   {
     up: migration_20261004_190657_home_photo_cards_band.up,
     down: migration_20261004_190657_home_photo_cards_band.down,
-    name: '20261004_190657_home_photo_cards_band'
+    name: '20261004_190657_home_photo_cards_band',
+  },
+  {
+    up: migration_20261004_191542_list_style.up,
+    down: migration_20261004_191542_list_style.down,
+    name: '20261004_191542_list_style'
   },
 ];

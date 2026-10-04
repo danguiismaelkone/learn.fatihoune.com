@@ -4,7 +4,8 @@ import { Eyebrow, Heading, Media, Section, mediaFromDoc } from '@/components/pri
 import { CtaButton } from '@/components/ui/CtaButton'
 import { ClockIcon } from '@/components/ui/icons'
 import { SearchForm } from '@/components/ui/SearchForm'
-import { contactHref, type CtaKind } from '@/components/ui/cta'
+import { CallbackForm } from '@/components/ui/Callback'
+import { contactHref, whatsappHref, type CtaKind } from '@/components/ui/cta'
 import { RichText } from '@/components/ui/RichText'
 import { getCitableReferences } from '@/content/queries/references'
 import { getDomains, getPopularTrainings, getTrainingCounts } from '@/content/queries/trainings'
@@ -262,6 +263,26 @@ export async function RenderBlocks({ blocks, ctx }: { blocks: Block[]; ctx: Ctx 
         )
         break
       case 'list':
+        if (block.style === 'pillars') {
+          out.push(
+            <Section key={key} tone="white">
+              <div className="stack stack--lg">
+                <Heading>{block.title}</Heading>
+                {block.intro ? <p className="text text--soft">{block.intro}</p> : null}
+                <ol className="pillars">
+                  {block.items?.map((it, n) => (
+                    <li key={it.id}>
+                      <span className="pillars__num" aria-hidden="true">{String(n + 1).padStart(2, '0')}</span>
+                      {it.strong ? <h3 className="heading heading--3">{it.strong.replace(/[.:]\s*$/, '')}</h3> : null}
+                      <p className="text text--soft">{it.text}</p>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            </Section>,
+          )
+          break
+        }
         out.push(
           <Section key={key}>
             <div className="stack">
@@ -361,6 +382,26 @@ export async function RenderBlocks({ blocks, ctx }: { blocks: Block[]; ctx: Ctx 
                 <Buttons buttons={block.buttons as Cta[]} ctx={ctx} />
               </div>
             </Section>,
+          )
+          break
+        }
+        // Last block of the page: one closing contact block (buttons + callback form), replacing the
+        // global « Vous souhaitez être rappelé ? » section, which CSS hides when [data-closing] is present.
+        if (i === blocks.length - 1) {
+          out.push(
+            <section key={key} className="section section--warm section--ruled closing" data-closing aria-labelledby={`h-${key}`}>
+              <div className="container closing__inner">
+                <div className="stack">
+                  <Heading id={`h-${key}`}>{block.title}</Heading>
+                  {block.text ? <p className="text">{block.text}</p> : null}
+                  <Buttons buttons={block.buttons as Cta[]} ctx={ctx} />
+                </div>
+                <div className="closing__callback stack stack--sm">
+                  <strong className="heading heading--3">Ou laissez votre numéro, nous vous rappelons</strong>
+                  <CallbackForm whatsappUrl={whatsappHref(ctx.settings.whatsapp)} idPrefix={`cl-${key}`} layout="compact" />
+                </div>
+              </div>
+            </section>,
           )
           break
         }
