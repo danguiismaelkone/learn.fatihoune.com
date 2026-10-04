@@ -1,12 +1,12 @@
 import Link from 'next/link'
-import type { Media as MediaDoc, Page, SiteSetting } from '@/payload-types'
+import type { Media as MediaDoc, Page, SiteSetting, TrainingDomain } from '@/payload-types'
 import { Eyebrow, Heading, Media, Section, mediaFromDoc } from '@/components/primitives'
 import { CtaButton } from '@/components/ui/CtaButton'
 import { SearchForm } from '@/components/ui/SearchForm'
-import type { CtaKind } from '@/components/ui/cta'
+import { contactHref, type CtaKind } from '@/components/ui/cta'
 import { RichText } from '@/components/ui/RichText'
 import { getCitableReferences } from '@/content/queries/references'
-import { getDomains, getTrainingCounts } from '@/content/queries/trainings'
+import { getDomains, getPopularTrainings, getTrainingCounts } from '@/content/queries/trainings'
 
 type Block = Page['layout'][number]
 type Ctx = { settings: SiteSetting; pageTitle: string; from: string }
@@ -26,32 +26,59 @@ function Buttons({ buttons, ctx, firstId }: { buttons?: Cta[] | null; ctx: Ctx; 
   )
 }
 
-async function DomainIndex({ title }: { title: string }) {
-  const [domains, counts] = await Promise.all([getDomains(), getTrainingCounts()])
+async function DomainIndex({ title, ctx }: { title: string; ctx: Ctx }) {
+  const [domains, counts, popular] = await Promise.all([getDomains(), getTrainingCounts(), getPopularTrainings()])
   const total = [...counts.values()].reduce((a, b) => a + b, 0)
   return (
-    <Section tone="white" ruled>
-      <div className="stack stack--lg">
-        <div className="cluster" style={{ justifyContent: 'space-between' }}>
-          <Heading>{title}</Heading>
-          <Link className="link" href="/formations">Toutes les formations ({total})</Link>
+    <>
+      <Section tone="ink">
+        <div className="stack stack--lg">
+          <div className="cluster" style={{ justifyContent: 'space-between' }}>
+            <Heading>{title}</Heading>
+            <Link className="link" href="/formations">Toutes les formations ({total})</Link>
+          </div>
+          <ol className="domain-chips">
+            {domains.map((d, i) => {
+              const n = counts.get(d.id) ?? 0
+              return (
+                <li key={d.id}>
+                  <Link href={`/formations/${d.slug}`}>
+                    <em className="num">{pad(i + 1)}</em>
+                    <span className="domain-chips__title">{d.title}</span>
+                    <span className="domain-chips__count">{n}<span className="sr-only"> formation{n > 1 ? 's' : ''}</span></span>
+                  </Link>
+                </li>
+              )
+            })}
+          </ol>
         </div>
-        <ol className="index">
-          {domains.map((d, i) => {
-            const n = counts.get(d.id) ?? 0
-            return (
-              <li key={d.id}>
-                <Link href={`/formations/${d.slug}`}>
-                  <em className="num">{pad(i + 1)}</em>
-                  <span className="index__title">{d.title}<span className="index__summary">{d.summary}</span></span>
-                  <span className="index__count">{n} formation{n > 1 ? 's' : ''}</span>
-                </Link>
-              </li>
-            )
-          })}
-        </ol>
-      </div>
-    </Section>
+        <div className="motif domain-chips__band" aria-hidden="true" />
+      </Section>
+      {popular.length ? (
+        <Section tone="white" labelledBy="popular-title">
+          <div className="stack">
+            <Heading id="popular-title">Les formations les plus demandées</Heading>
+            <ul className="themes">
+              {popular.map((t) => {
+                const domain = t.domain as TrainingDomain
+                return (
+                  <li key={t.id}>
+                    <span>
+                      {t.title}
+                      <Link className="themes__domain" href={`/formations/${domain.slug}`}>{domain.title}</Link>
+                    </span>
+                    <span className="themes__duration">{t.durationLabel ?? ''}</span>
+                    <Link className="link themes__ask" href={contactHref('quote', `${domain.title} › ${t.title}`, ctx.from)}>
+                      Demander cette formation<span className="sr-only"> : {t.title}</span>
+                    </Link>
+                  </li>
+                )
+              })}
+            </ul>
+          </div>
+        </Section>
+      ) : null}
+    </>
   )
 }
 
@@ -167,7 +194,7 @@ export async function RenderBlocks({ blocks, ctx }: { blocks: Block[]; ctx: Ctx 
         break
       }
       case 'domainIndex':
-        out.push(<DomainIndex key={key} title={block.title} />)
+        out.push(<DomainIndex key={key} title={block.title} ctx={ctx} />)
         break
       case 'referencesTeaser':
         out.push(<ReferencesTeaser key={key} block={block} ctx={ctx} />)

@@ -79,6 +79,9 @@ button,input,textarea,select{font:inherit;color:inherit}
 .section{padding-block:var(--section-y)}
 .section--white{background:var(--white)}
 .section--warm{background:var(--surface-warm)}
+.section--ink{background:var(--ink);color:var(--white);padding-bottom:0}
+.section--ink .heading{color:var(--white)}
+.section--ink .link{color:var(--white)}
 .section--ruled{border-top:var(--rule)}
 .section--tight{padding-block:var(--s-6)}
 .stack{display:flex;flex-direction:column;gap:var(--s-4)}
@@ -174,6 +177,18 @@ button,input,textarea,select{font:inherit;color:inherit}
 .index__summary{display:block;color:var(--ink-soft);font-size:var(--step--1);font-weight:var(--fw-regular);letter-spacing:0;margin-top:2px}
 .index__count{font-variant-numeric:tabular-nums;color:var(--ink-soft);font-size:var(--step--1);white-space:nowrap}
 .index__count::after{content:" ›";color:var(--primary)}
+/* Home: domains as numbered white tiles on ink, then the ivorian band */
+.domain-chips{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,17rem),1fr));gap:var(--s-2)}
+.domain-chips a{display:grid;grid-template-columns:2em minmax(0,1fr) auto;gap:var(--s-2);align-items:baseline;height:100%;padding:var(--s-3) var(--s-4);background:var(--white);color:var(--ink);border-radius:var(--radius);text-decoration:none;font-weight:var(--fw-bold);transition:background var(--dur) var(--ease)}
+.domain-chips a:hover{background:var(--surface-warm)}
+.domain-chips a:focus-visible{outline:2px solid var(--white);outline-offset:2px}
+.domain-chips__count{font-variant-numeric:tabular-nums;color:var(--ink-soft);font-size:var(--step--1);font-weight:var(--fw-regular)}
+.domain-chips__count::after{content:" ›";color:var(--primary)}
+.domain-chips__band{height:12px;margin-top:var(--section-y)}
+.themes__domain{display:block;font-size:var(--step--1);color:var(--ink-soft);margin-top:2px}
+.visit{display:grid;gap:var(--s-4)}
+.visit__card{font-style:normal;display:flex;flex-direction:column;gap:var(--s-2);border-left:4px solid var(--accent);padding-left:var(--s-4)}
+.visit__address{white-space:pre-line;font-weight:var(--fw-bold);font-size:var(--step-1)}
 .doors{display:grid;border-top:1px solid var(--ink)}
 .doors a{display:block;padding:var(--s-5) 0;border-bottom:var(--border);text-decoration:none}
 .doors a:hover .heading{color:var(--primary-strong)}
@@ -305,6 +320,7 @@ a.card:hover{border-color:var(--ink)}
   .only-desktop{display:block}
   .only-mobile{display:none}
   .with-aside{grid-template-columns:var(--col-main) var(--col-side)}
+  .visit{grid-template-columns:var(--col-side) var(--col-main);align-items:start}
   .aside{display:block;position:sticky;top:96px;align-self:start}
   .sticky-cta{display:none}
   .wa-float{bottom:var(--s-5)}
