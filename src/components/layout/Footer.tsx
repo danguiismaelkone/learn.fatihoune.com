@@ -23,10 +23,10 @@ export async function Footer() {
             <span>WhatsApp {s.whatsappDisplay}</span>
             <a href={`mailto:${s.email}`}>{s.email}</a>
             <span className="footer__muted" style={{ whiteSpace: 'pre-line' }}>{s.address}</span>
+            {s.hours ? <span className="footer__muted">{s.hours}</span> : null}
             <a href={`https://www.google.com/maps/search/${encodeURIComponent(s.address.replace(/\n/g, ' '))}`} target="_blank" rel="noopener noreferrer">
               Itinéraire Google Maps
             </a>
-            {s.hours ? <span className="footer__muted">{s.hours}</span> : null}
           </address>
         </div>
         <div className="stack stack--sm">
@@ -54,7 +54,7 @@ export async function Footer() {
           {s.accreditations?.length ? (
             <div className="stack stack--sm">
               <h2>Agréments et réseaux</h2>
-              <ul className="proof proof--dark">
+              <ul className="proof">
                 {s.accreditations.map((a) => (
                   <li key={a.id ?? a.name}>{a.name}</li>
                 ))}
