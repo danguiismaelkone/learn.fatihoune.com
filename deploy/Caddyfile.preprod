@@ -1,0 +1,6 @@
+# Pre-production: HTTPS automatic. Password + noindex are enforced by the app (SITE_ENV=preview).
+{$SITE_DOMAIN} {
+	encode gzip zstd
+	header X-Robots-Tag "noindex, nofollow"
+	reverse_proxy app:3000
+}

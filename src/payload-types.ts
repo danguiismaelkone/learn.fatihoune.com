@@ -67,8 +67,15 @@ export interface Config {
   };
   blocks: {};
   collections: {
-    users: User;
+    leads: Lead;
+    'training-domains': TrainingDomain;
+    trainings: Training;
+    certificates: Certificate;
+    pages: Page;
+    references: Reference;
     media: Media;
+    users: User;
+    'audit-logs': AuditLog;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -76,19 +83,30 @@ export interface Config {
   };
   collectionsJoins: {};
   collectionsSelect: {
-    users: UsersSelect<false> | UsersSelect<true>;
+    leads: LeadsSelect<false> | LeadsSelect<true>;
+    'training-domains': TrainingDomainsSelect<false> | TrainingDomainsSelect<true>;
+    trainings: TrainingsSelect<false> | TrainingsSelect<true>;
+    certificates: CertificatesSelect<false> | CertificatesSelect<true>;
+    pages: PagesSelect<false> | PagesSelect<true>;
+    references: ReferencesSelect<false> | ReferencesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    users: UsersSelect<false> | UsersSelect<true>;
+    'audit-logs': AuditLogsSelect<false> | AuditLogsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: string;
+    defaultIDType: number;
   };
   fallbackLocale: null;
-  globals: {};
-  globalsSelect: {};
+  globals: {
+    'site-settings': SiteSetting;
+  };
+  globalsSelect: {
+    'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
+  };
   locale: null;
   widgets: {
     collections: CollectionsWidget;
@@ -118,11 +136,422 @@ export interface UserAuthOperations {
   };
 }
 /**
+ * Toutes les demandes envoyées depuis le site. Cochez plusieurs lignes pour les marquer en cours, traitées, les archiver ou les exporter.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "leads".
+ */
+export interface Lead {
+  id: number;
+  status: 'new' | 'in_progress' | 'done' | 'archived';
+  type: 'quote' | 'info' | 'partnership';
+  name: string;
+  company?: string | null;
+  jobTitle?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  topic?: string | null;
+  participants?: number | null;
+  message: string;
+  internalNote?: string | null;
+  tracking?: {
+    sourcePage?: string | null;
+    consent?: boolean | null;
+    notification?: ('sent' | 'failed' | 'not_configured') | null;
+    notificationError?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Les 11 grands domaines (Management, Ressources humaines…). Une page par domaine.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "training-domains".
+ */
+export interface TrainingDomain {
+  id: number;
+  title: string;
+  h1: string;
+  summary: string;
+  intro: string;
+  /**
+   * Ex. « Diriger une équipe », « Gérer des projets ».
+   */
+  groups?:
+    | {
+        title: string;
+        id?: string | null;
+      }[]
+    | null;
+  extra?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  relatedCertificate?: (number | null) | Certificate;
+  image?: (number | null) | Media;
+  /**
+   * Partie de l'adresse web, en minuscules et sans accents (ex. ressources-humaines). Ne la modifiez pas après publication.
+   */
+  slug: string;
+  status: 'draft' | 'published';
+  /**
+   * Plus petit = plus haut.
+   */
+  order?: number | null;
+  publishedAt?: string | null;
+  seo?: {
+    /**
+     * 50 à 60 caractères.
+     */
+    title?: string | null;
+    /**
+     * 140 à 160 caractères.
+     */
+    description?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "certificates".
+ */
+export interface Certificate {
+  id: number;
+  /**
+   * Ex. CS1-GRH
+   */
+  code: string;
+  title: string;
+  shortTitle: string;
+  durationHours: number;
+  status: 'draft' | 'published';
+  /**
+   * Plus petit = plus haut.
+   */
+  order?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media".
+ */
+export interface Media {
+  id: number;
+  /**
+   * Ex. « Formateur FATIHOUNE animant une session devant un groupe ».
+   */
+  alt: string;
+  /**
+   * Obligatoire pour une image qui ne vous appartient pas (banque d’images, photographe).
+   */
+  credit?: {
+    author?: string | null;
+    source?: ('own' | 'unsplash' | 'other') | null;
+    url?: string | null;
+  };
+  consent?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    card?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    wide?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
+}
+/**
+ * Une ligne par formation. Pour publier ou dépublier plusieurs formations d’un coup : cochez-les, puis « Modifier ».
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "trainings".
+ */
+export interface Training {
+  id: number;
+  title: string;
+  domain: number | TrainingDomain;
+  /**
+   * Doit correspondre exactement à un sous-groupe du domaine.
+   */
+  group?: string | null;
+  durationHours?: number | null;
+  /**
+   * Ex. « 30 h », « 5 jours ». Laisser vide si inconnue : rien ne s’affiche.
+   */
+  durationLabel?: string | null;
+  audience?: string | null;
+  objectives?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  status: 'draft' | 'published';
+  /**
+   * Plus petit = plus haut.
+   */
+  order?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Digitalisation, Programmes, Financement FDFP, Qui sommes-nous, pages légales…
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages".
+ */
+export interface Page {
+  id: number;
+  title: string;
+  /**
+   * Ex. digitalisation, programmes/entrepreneuriat. Ne pas modifier après publication.
+   */
+  path: string;
+  parentLabel?: 'programmes' | null;
+  layout: (
+    | {
+        eyebrow?: string | null;
+        title: string;
+        lead: string;
+        buttons?:
+          | {
+              label: string;
+              kind: 'quote' | 'info' | 'partnership' | 'whatsapp' | 'link';
+              /**
+               * Ex. /financement-fdfp
+               */
+              href?: string | null;
+              topic?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        showProof?: boolean | null;
+        variant?: ('split' | 'fullbleed') | null;
+        showSearch?: boolean | null;
+        image?: (number | null) | Media;
+        withPhotoSlot?: boolean | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'hero';
+      }
+    | {
+        title: string;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'domainIndex';
+      }
+    | {
+        title: string;
+        intro?: string | null;
+        showStats?: boolean | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'referencesTeaser';
+      }
+    | {
+        /**
+         * Ex. femmes → lien /programmes#femmes
+         */
+        anchor?: string | null;
+        title?: string | null;
+        body?: {
+          root: {
+            type: string;
+            children: {
+              type: any;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        } | null;
+        tone?: ('paper' | 'white' | 'callout') | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'text';
+      }
+    | {
+        title: string;
+        items?:
+          | {
+              title: string;
+              body?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'steps';
+      }
+    | {
+        title: string;
+        intro?: string | null;
+        items?:
+          | {
+              strong?: string | null;
+              text: string;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'list';
+      }
+    | {
+        title?: string | null;
+        info?: boolean | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'stats';
+      }
+    | {
+        title: string;
+        items?:
+          | {
+              year: string;
+              text: string;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'timeline';
+      }
+    | {
+        title?: string | null;
+        style?: ('cards' | 'doors') | null;
+        items?:
+          | {
+              eyebrow?: string | null;
+              title: string;
+              text?: string | null;
+              href: string;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'linkCards';
+      }
+    | {
+        title: string;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'partners';
+      }
+    | {
+        title: string;
+        text?: string | null;
+        buttons?:
+          | {
+              label: string;
+              kind: 'quote' | 'info' | 'partnership' | 'whatsapp' | 'link';
+              /**
+               * Ex. /financement-fdfp
+               */
+              href?: string | null;
+              topic?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'demand';
+      }
+  )[];
+  stickyCta?: ('quote' | 'info' | 'partnership' | 'none') | null;
+  status: 'draft' | 'published';
+  publishedAt?: string | null;
+  seo?: {
+    /**
+     * 50 à 60 caractères.
+     */
+    title?: string | null;
+    /**
+     * 140 à 160 caractères.
+     */
+    description?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Seuls les clients avec « Peut être cité » coché apparaissent sur le site. Pour en autoriser plusieurs : cochez-les, puis « Modifier ».
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "references".
+ */
+export interface Reference {
+  id: number;
+  name: string;
+  city?: string | null;
+  category: 'ministry' | 'agency' | 'local' | 'international' | 'association';
+  logo?: (number | null) | Media;
+  canBeCited?: boolean | null;
+  isProgramPartner?: boolean | null;
+  proofDocument?: (number | null) | Media;
+  /**
+   * Plus petit = plus haut.
+   */
+  order?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
-  id: string;
+  id: number;
+  name?: string | null;
+  roles: ('admin' | 'editor')[];
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -130,6 +559,7 @@ export interface User {
   resetPasswordExpiration?: string | null;
   salt?: string | null;
   hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
   sessions?:
@@ -143,30 +573,27 @@ export interface User {
   collection: 'users';
 }
 /**
+ * Une ligne par document modifié, y compris lors des actions groupées. Lecture seule.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media".
+ * via the `definition` "audit-logs".
  */
-export interface Media {
-  id: string;
-  alt: string;
+export interface AuditLog {
+  id: number;
+  collectionSlug: string;
+  documentId: string;
+  action: string;
+  summary?: string | null;
+  user?: (number | null) | User;
   updatedAt: string;
   createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
-  id: string;
+  id: number;
   key: string;
   data:
     | {
@@ -183,20 +610,48 @@ export interface PayloadKv {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: string;
+  id: number;
   document?:
     | ({
-        relationTo: 'users';
-        value: string | User;
+        relationTo: 'leads';
+        value: number | Lead;
+      } | null)
+    | ({
+        relationTo: 'training-domains';
+        value: number | TrainingDomain;
+      } | null)
+    | ({
+        relationTo: 'trainings';
+        value: number | Training;
+      } | null)
+    | ({
+        relationTo: 'certificates';
+        value: number | Certificate;
+      } | null)
+    | ({
+        relationTo: 'pages';
+        value: number | Page;
+      } | null)
+    | ({
+        relationTo: 'references';
+        value: number | Reference;
       } | null)
     | ({
         relationTo: 'media';
-        value: string | Media;
+        value: number | Media;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: number | User;
+      } | null)
+    | ({
+        relationTo: 'audit-logs';
+        value: number | AuditLog;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -206,10 +661,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: string;
+  id: number;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   key?: string | null;
   value?:
@@ -229,7 +684,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: string;
+  id: number;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -237,9 +692,331 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "leads_select".
+ */
+export interface LeadsSelect<T extends boolean = true> {
+  status?: T;
+  type?: T;
+  name?: T;
+  company?: T;
+  jobTitle?: T;
+  phone?: T;
+  email?: T;
+  topic?: T;
+  participants?: T;
+  message?: T;
+  internalNote?: T;
+  tracking?:
+    | T
+    | {
+        sourcePage?: T;
+        consent?: T;
+        notification?: T;
+        notificationError?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "training-domains_select".
+ */
+export interface TrainingDomainsSelect<T extends boolean = true> {
+  title?: T;
+  h1?: T;
+  summary?: T;
+  intro?: T;
+  groups?:
+    | T
+    | {
+        title?: T;
+        id?: T;
+      };
+  extra?: T;
+  relatedCertificate?: T;
+  image?: T;
+  slug?: T;
+  status?: T;
+  order?: T;
+  publishedAt?: T;
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "trainings_select".
+ */
+export interface TrainingsSelect<T extends boolean = true> {
+  title?: T;
+  domain?: T;
+  group?: T;
+  durationHours?: T;
+  durationLabel?: T;
+  audience?: T;
+  objectives?: T;
+  status?: T;
+  order?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "certificates_select".
+ */
+export interface CertificatesSelect<T extends boolean = true> {
+  code?: T;
+  title?: T;
+  shortTitle?: T;
+  durationHours?: T;
+  status?: T;
+  order?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages_select".
+ */
+export interface PagesSelect<T extends boolean = true> {
+  title?: T;
+  path?: T;
+  parentLabel?: T;
+  layout?:
+    | T
+    | {
+        hero?:
+          | T
+          | {
+              eyebrow?: T;
+              title?: T;
+              lead?: T;
+              buttons?:
+                | T
+                | {
+                    label?: T;
+                    kind?: T;
+                    href?: T;
+                    topic?: T;
+                    id?: T;
+                  };
+              showProof?: T;
+              variant?: T;
+              showSearch?: T;
+              image?: T;
+              withPhotoSlot?: T;
+              id?: T;
+              blockName?: T;
+            };
+        domainIndex?:
+          | T
+          | {
+              title?: T;
+              id?: T;
+              blockName?: T;
+            };
+        referencesTeaser?:
+          | T
+          | {
+              title?: T;
+              intro?: T;
+              showStats?: T;
+              id?: T;
+              blockName?: T;
+            };
+        text?:
+          | T
+          | {
+              anchor?: T;
+              title?: T;
+              body?: T;
+              tone?: T;
+              id?: T;
+              blockName?: T;
+            };
+        steps?:
+          | T
+          | {
+              title?: T;
+              items?:
+                | T
+                | {
+                    title?: T;
+                    body?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        list?:
+          | T
+          | {
+              title?: T;
+              intro?: T;
+              items?:
+                | T
+                | {
+                    strong?: T;
+                    text?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        stats?:
+          | T
+          | {
+              title?: T;
+              info?: T;
+              id?: T;
+              blockName?: T;
+            };
+        timeline?:
+          | T
+          | {
+              title?: T;
+              items?:
+                | T
+                | {
+                    year?: T;
+                    text?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        linkCards?:
+          | T
+          | {
+              title?: T;
+              style?: T;
+              items?:
+                | T
+                | {
+                    eyebrow?: T;
+                    title?: T;
+                    text?: T;
+                    href?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        partners?:
+          | T
+          | {
+              title?: T;
+              id?: T;
+              blockName?: T;
+            };
+        demand?:
+          | T
+          | {
+              title?: T;
+              text?: T;
+              buttons?:
+                | T
+                | {
+                    label?: T;
+                    kind?: T;
+                    href?: T;
+                    topic?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+      };
+  stickyCta?: T;
+  status?: T;
+  publishedAt?: T;
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "references_select".
+ */
+export interface ReferencesSelect<T extends boolean = true> {
+  name?: T;
+  city?: T;
+  category?: T;
+  logo?: T;
+  canBeCited?: T;
+  isProgramPartner?: T;
+  proofDocument?: T;
+  order?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media_select".
+ */
+export interface MediaSelect<T extends boolean = true> {
+  alt?: T;
+  credit?:
+    | T
+    | {
+        author?: T;
+        source?: T;
+        url?: T;
+      };
+  consent?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+  sizes?:
+    | T
+    | {
+        card?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        wide?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  name?: T;
+  roles?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -247,6 +1024,7 @@ export interface UsersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  resetPasswordRequestedAt?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -259,21 +1037,16 @@ export interface UsersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media_select".
+ * via the `definition` "audit-logs_select".
  */
-export interface MediaSelect<T extends boolean = true> {
-  alt?: T;
+export interface AuditLogsSelect<T extends boolean = true> {
+  collectionSlug?: T;
+  documentId?: T;
+  action?: T;
+  summary?: T;
+  user?: T;
   updatedAt?: T;
   createdAt?: T;
-  url?: T;
-  thumbnailURL?: T;
-  filename?: T;
-  mimeType?: T;
-  filesize?: T;
-  width?: T;
-  height?: T;
-  focalX?: T;
-  focalY?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -314,6 +1087,87 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-settings".
+ */
+export interface SiteSetting {
+  id: number;
+  phone: string;
+  /**
+   * Ex. 2250103123266
+   */
+  whatsapp: string;
+  whatsappDisplay: string;
+  email: string;
+  address: string;
+  hours?: string | null;
+  /**
+   * Ex. « sous 48 h ouvrées ». Laisser vide tant qu’il n’est pas garanti.
+   */
+  responseDelay?: string | null;
+  accreditations?:
+    | {
+        name: string;
+        fullName: string;
+        detail?: string | null;
+        validUntil?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  keyFigures?:
+    | {
+        value: string;
+        label: string;
+        source: string;
+        id?: string | null;
+      }[]
+    | null;
+  catalogPdf?: (number | null) | Media;
+  presentationPdf?: (number | null) | Media;
+  /**
+   * Séparées par des virgules.
+   */
+  notifyEmails?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-settings_select".
+ */
+export interface SiteSettingsSelect<T extends boolean = true> {
+  phone?: T;
+  whatsapp?: T;
+  whatsappDisplay?: T;
+  email?: T;
+  address?: T;
+  hours?: T;
+  responseDelay?: T;
+  accreditations?:
+    | T
+    | {
+        name?: T;
+        fullName?: T;
+        detail?: T;
+        validUntil?: T;
+        id?: T;
+      };
+  keyFigures?:
+    | T
+    | {
+        value?: T;
+        label?: T;
+        source?: T;
+        id?: T;
+      };
+  catalogPdf?: T;
+  presentationPdf?: T;
+  notifyEmails?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

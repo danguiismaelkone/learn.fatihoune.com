@@ -1,0 +1,20 @@
+{
+ "home":{"id":"1-aA2Fadydc","author":"Quilia","user":"heyquilia","alt":"Participants assis dans une salle de réunion face à un écran de projection"},
+ "about":{"id":"YsJUxCIW14U","author":"Ninthgrid","user":"ninthgrid_","alt":"Équipe de professionnels réunie autour d’une table de travail"},
+ "management":{"id":"3gO_bWev2jQ","author":"UK Black Tech","user":"ukblacktech","alt":"Une femme présente un sujet à des collègues lors d’une réunion"},
+ "ressources-humaines":{"id":"U7zb_4mTVPQ","author":"Iwaria Inc.","user":"iwaria","alt":"Deux personnes échangent lors d’un entretien"},
+ "comptabilite-finance-fiscalite":{"id":"hdfPDesgEw8","author":"Ninthgrid","user":"ninthgrid_","alt":"Deux hommes travaillent ensemble à un bureau"},
+ "marketing-vente":{"id":"WXBtff7bNRA","author":"Ninthgrid","user":"ninthgrid_","alt":"Une poignée de main conclut un échange entre professionnels"},
+ "informatique-bureautique":{"id":"IgUR1iX0mqM","author":"X","user":"disruptxn","alt":"Personnes travaillant sur des ordinateurs dans une salle"},
+ "qhse":{"id":"g-I1MUt16dc","author":"Edouard TAMBA","user":"tamba","alt":"Ouvrier portant un casque de sécurité rouge"},
+ "maintenance-logistique":{"id":"2zOSkNTj-Ks","author":"Random Institute","user":"randominstitute","alt":"Mécanicien au travail dans un atelier"},
+ "mines-geologie":{"id":"k1rtD9cyTvw","author":"Zach Wear","user":"zachwear","alt":"Deux ouvriers sur un site d’extraction de gravier"},
+ "ingenierie-formation":{"id":"2Q3Ivd-HsaM","author":"Jeswin Thomas","user":"jeswinthomas","alt":"Une formatrice écrit sur un tableau blanc"},
+ "developpement-personnel":{"id":"lFntEHwQvi4","author":"Christina @ wocintechchat.com","user":"wocintechchat","alt":"Une professionnelle souriante, bras croisés"},
+ "langues":{"id":"oc_XTqWezp4","author":"Monica Melton","user":"monicomelty","alt":"Une femme prend des notes à une table"},
+ "digitalisation":{"id":"e8etaVo85AY","author":"Oluwatobi Fasipe","user":"fasipe_tobi","alt":"Un homme travaille sur un ordinateur portable"},
+ "financement-fdfp":{"id":"-ZRtrH-RubE","author":"Vitaly Gariev","user":"silverkblack","alt":"Une employée travaille à son bureau"},
+ "programmes":{"id":"Sn04BHfa2AY","author":"Annie Spratt","user":"anniespratt","alt":"Groupe de femmes souriantes"},
+ "programmes/insertion-professionnelle":{"id":"DwEfVKirLW4","author":"Nqobile Vundla","user":"nqoe","alt":"Jeunes diplômés en toge célébrant leur diplôme"},
+ "programmes/entrepreneuriat":{"id":"5dFuO02OHh0","author":"Ali Mkumbwa","user":"mkumbwajr","alt":"Une commerçante devant son étal de fruits, téléphone en main"}
+}

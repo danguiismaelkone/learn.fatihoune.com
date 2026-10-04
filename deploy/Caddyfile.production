@@ -1,0 +1,14 @@
+# Production: formation.fatihoune.com + the legacy domain (one-hop redirects handled by the app).
+{$SITE_DOMAIN} {
+	encode gzip zstd
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+	}
+	reverse_proxy app:3000
+}
+
+fatihoune.com, www.fatihoune.com {
+	reverse_proxy app:3000
+}

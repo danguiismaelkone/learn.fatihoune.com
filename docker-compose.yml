@@ -1,43 +1,64 @@
-version: '3'
+# FATIHOUNE Formation — deployment on one small VPS.
+#   Pre-production : docker compose --env-file .env.preprod up -d --build
+#   Production     : docker compose --env-file .env.production up -d --build
+# Full procedure: project/6-build/DEPLOY.md
+name: fatihoune-${SITE_ENV:-preview}
 
 services:
-  payload:
-    image: node:20-alpine
-    ports:
-      - '3000:3000'
+  app:
+    build:
+      context: .
+      args:
+        SITE_ENV: ${SITE_ENV:-preview}
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:?NEXT_PUBLIC_SITE_URL is required}
+    image: fatihoune-formation:${SITE_ENV:-preview}
+    restart: unless-stopped
+    env_file: ${ENV_FILE:-.env.preprod}
+    environment:
+      DATABASE_URL: file:/data/fatihoune.db
+      MEDIA_DIR: /data/media
     volumes:
-      - .:/home/node/app
-      - node_modules:/home/node/app/node_modules
-    working_dir: /home/node/app/
-    command: sh -c "corepack enable && corepack prepare pnpm@latest --activate && pnpm install && pnpm dev"
+      - data:/data
+    expose:
+      - '3000'
+
+  caddy:
+    image: caddy:2.10-alpine
+    restart: unless-stopped
+    ports:
+      - '${HTTP_PORT:-80}:80'
+      - '${HTTPS_PORT:-443}:443'
+    environment:
+      SITE_DOMAIN: ${SITE_DOMAIN:?SITE_DOMAIN is required}
+    volumes:
+      - ./deploy/${CADDYFILE:-Caddyfile.preprod}:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
     depends_on:
-      - mongo
-      # - postgres
-    env_file:
-      - .env
+      app:
+        condition: service_healthy
 
-  # Ensure your DATABASE_URL uses 'mongo' as the hostname ie. mongodb://mongo/my-db-name
-  mongo:
-    image: mongo:latest
-    ports:
-      - '27017:27017'
-    command:
-      - --storageEngine=wiredTiger
+  # Daily backup of the database (consistent SQLite snapshot) and uploaded media; keeps 14 days.
+  backup:
+    image: alpine:3.22
+    restart: unless-stopped
     volumes:
-      - data:/data/db
-    logging:
-      driver: none
-
-  # Uncomment the following to use postgres
-  # postgres:
-  #   restart: always
-  #   image: postgres:latest
-  #   volumes:
-  #     - pgdata:/var/lib/postgresql/data
-  #   ports:
-  #     - "5432:5432"
+      - data:/data:ro
+      - ./backups:/backups
+    entrypoint: ['/bin/sh', '-c']
+    command:
+      - |
+        apk add --no-cache sqlite >/dev/null
+        while true; do
+          stamp=$$(date +%F)
+          sqlite3 /data/fatihoune.db ".backup /backups/fatihoune-$$stamp.db" \
+            && tar -czf /backups/media-$$stamp.tar.gz -C /data media \
+            && echo "backup $$stamp ok"
+          find /backups -type f -mtime +14 -delete
+          sleep 86400
+        done
 
 volumes:
   data:
-  # pgdata:
-  node_modules:
+  caddy_data:
+  caddy_config:

@@ -48,3 +48,12 @@ node_modules/
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+# FATIHOUNE
+/media
+*.db
+*.db-journal
+
+/backups
+.env.preprod
+.env.production

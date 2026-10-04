@@ -1,0 +1,19 @@
+# Never ship secrets, local data or build output into the image.
+.env
+.env.*
+!.env.example
+*.db
+*.db-journal
+media/
+backups/
+node_modules/
+.next/
+.git/
+.github/
+tests/
+test-results/
+playwright-report/
+coverage/
+.vscode/
+.DS_Store
+npm-debug.log*
