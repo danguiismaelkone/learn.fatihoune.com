@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { RenderBlocks } from '@/components/blocks/RenderBlocks'
 import { StickyCta } from '@/components/ui/StickyCta'
+import { Visit } from '@/components/ui/Visit'
 import { getPageByPath } from '@/content/queries/pages'
 import { getSiteSettings } from '@/content/queries/settings'
 
@@ -22,6 +23,7 @@ export default async function HomePage() {
   return (
     <>
       <RenderBlocks blocks={page.layout} ctx={{ settings, pageTitle: 'Accueil', from: 'accueil' }} />
+      <Visit settings={settings} />
       <StickyCta href="/contact?type=quote&from=accueil" label="Demander un devis" />
     </>
   )

@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 
 type SectionProps = {
   children: ReactNode
-  tone?: 'paper' | 'white' | 'warm'
+  tone?: 'paper' | 'white' | 'warm' | 'ink'
   ruled?: boolean
   tight?: boolean
   id?: string

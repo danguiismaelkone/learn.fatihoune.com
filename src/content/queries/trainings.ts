@@ -36,6 +36,20 @@ export const getTrainingCounts = cache(async () => {
   return counts
 })
 
+/** Trainings tagged « Très demandée », for the home page. Domain is populated for links. */
+export const getPopularTrainings = cache(async (limit = 6) => {
+  const payload = await cms()
+  const { docs } = await payload.find({
+    collection: 'trainings',
+    where: { and: [published, { badges: { in: ['popular'] } }] },
+    sort: 'order',
+    limit,
+    depth: 1,
+    overrideAccess: false,
+  })
+  return docs.filter((t) => typeof t.domain === 'object' && t.domain.status === 'published')
+})
+
 export const getDomainBySlug = cache(async (slug: string) => {
   const payload = await cms()
   const { docs } = await payload.find({
