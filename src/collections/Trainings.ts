@@ -1,9 +1,31 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig, FieldHook } from 'payload'
 import { isStaff, nobody, publishedOrStaff } from '../access'
 import { orderField, statusField } from '../fields/common'
 import { auditAfterChange } from '../hooks/audit'
 import { revalidateAfterChange } from '../hooks/revalidate'
-import { TRAINING_BADGES, TRAINING_BADGE_LABELS } from '../lib/training'
+import { TRAINING_BADGES, TRAINING_BADGE_LABELS, slugify } from '../lib/training'
+
+/** Slug from the title when empty; suffixed (-2, -3…) if another training already uses it. */
+const uniqueSlug: FieldHook = async ({ value, data, originalDoc, req }) => {
+  const base = slugify((value as string | undefined) || (data?.title as string | undefined) || '')
+  if (!base) return value
+  let candidate = base
+  for (let n = 2; n < 50; n++) {
+    const { docs } = await req.payload.find({
+      collection: 'trainings',
+      where: { slug: { equals: candidate } },
+      limit: 1,
+      depth: 0,
+      overrideAccess: true,
+      req,
+    })
+    if (!docs.length || docs[0].id === originalDoc?.id) return candidate
+    candidate = `${base}-${n}`
+  }
+  return candidate
+}
+
+const DETAIL_REQUIRED = ['audience', 'objectives', 'program'] as const
 
 export const Trainings: CollectionConfig = {
   slug: 'trainings',
@@ -11,7 +33,7 @@ export const Trainings: CollectionConfig = {
   admin: {
     useAsTitle: 'title',
     group: 'Formations',
-    defaultColumns: ['title', 'domain', 'group', 'durationLabel', 'status'],
+    defaultColumns: ['title', 'domain', 'group', 'durationLabel', 'detailPublished', 'status'],
     listSearchableFields: ['title'],
     description:
       'Une ligne par formation. Pour publier ou dépublier plusieurs formations d’un coup : cochez-les, puis « Modifier ».',
@@ -55,8 +77,50 @@ export const Trainings: CollectionConfig = {
       options: TRAINING_BADGES.map((value) => ({ value, label: TRAINING_BADGE_LABELS[value] })),
       admin: { description: 'Affichées à côté de l’intitulé dans la page du domaine. Facultatif.' },
     },
-    { name: 'audience', label: 'Public visé', type: 'text' },
-    { name: 'objectives', label: 'Objectifs (fiche détaillée, plus tard)', type: 'richText' },
+    {
+      name: 'slug',
+      label: 'Adresse de la fiche (slug)',
+      type: 'text',
+      unique: true,
+      index: true,
+      hooks: { beforeValidate: [uniqueSlug] },
+      admin: {
+        position: 'sidebar',
+        description: 'Créée automatiquement à partir de l’intitulé. Ne la modifiez pas après publication de la fiche.',
+      },
+    },
+    {
+      name: 'detailPublished',
+      label: 'Publier la fiche détaillée',
+      type: 'checkbox',
+      defaultValue: false,
+      admin: {
+        position: 'sidebar',
+        description: 'Ouvre la page /formations/<domaine>/<fiche>. Exige public visé, objectifs et programme relus.',
+      },
+      validate: (value: boolean | null | undefined, { siblingData }: { siblingData: Record<string, unknown> }) => {
+        if (!value) return true
+        const missing = DETAIL_REQUIRED.filter((k) => {
+          const v = siblingData?.[k]
+          return !v || (typeof v === 'string' && !v.trim())
+        })
+        return missing.length
+          ? 'Avant de publier la fiche, remplissez : public visé, objectifs et programme.'
+          : true
+      },
+    },
+    {
+      type: 'collapsible',
+      label: 'Fiche détaillée',
+      admin: { initCollapsed: false, description: 'Contenu de la page de la formation. Rien n’est visible tant que « Publier la fiche détaillée » n’est pas coché.' },
+      fields: [
+        { name: 'audience', label: 'Public visé', type: 'textarea' },
+        { name: 'prerequisites', label: 'Prérequis', type: 'textarea', admin: { description: 'Laisser vide s’il n’y en a pas : la fiche affichera « Aucun prérequis ».' } },
+        { name: 'objectives', label: 'Objectifs', type: 'richText' },
+        { name: 'program', label: 'Programme', type: 'richText' },
+        { name: 'draftNote', label: 'Note de relecture (interne, jamais affichée)', type: 'textarea' },
+      ],
+    },
     statusField,
     orderField,
   ],

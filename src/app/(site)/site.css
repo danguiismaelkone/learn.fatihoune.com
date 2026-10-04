@@ -282,6 +282,20 @@ button,input,textarea,select{font:inherit;color:inherit}
 .group .themes{padding-inline:var(--s-4)}
 .group .themes li:last-child{border-bottom:0}
 .badge{display:inline-block;margin-left:var(--s-2);border:1px solid var(--ink);border-radius:var(--radius);padding:0 6px;font-size:var(--step--1);font-weight:var(--fw-bold);line-height:1.6;vertical-align:1px;white-space:nowrap}
+.badge--light{margin-left:0;border-color:var(--white);color:var(--white)}
+.themes__title-link{font-weight:var(--fw-bold);text-decoration:underline;text-decoration-color:var(--primary);text-underline-offset:3px}
+.themes__title-link:hover{text-decoration-thickness:2px}
+/* Training page: sticky in-page tabs, ruled sections, practical info list */
+.tabs{position:sticky;top:var(--header-h,67px);z-index:30;background:var(--white);border-bottom:var(--border)}
+.tabs__list{display:flex;gap:var(--s-5);overflow-x:auto;list-style:none;margin-block:0;white-space:nowrap}
+.tabs__list a{display:block;padding:var(--s-3) 0;text-decoration:none;font-weight:var(--fw-bold);font-size:var(--step--1);border-bottom:3px solid transparent}
+.tabs__list a:hover{border-bottom-color:var(--primary)}
+.fiche__section{display:flex;flex-direction:column;gap:var(--s-3);border-top:var(--rule);padding-top:var(--s-4);scroll-margin-top:calc(var(--header-h,67px) + 56px)}
+.fiche__section.callout{border-top:0}
+.fiche .prose ul,.fiche .prose ol{display:grid;gap:var(--s-2)}
+.info__list{display:grid;grid-template-columns:auto minmax(0,1fr);gap:var(--s-2) var(--s-4);margin:0}
+.info__list dt{color:var(--ink-soft);font-size:var(--step--1)}
+.info__list dd{margin:0;font-weight:var(--fw-bold)}
 .themes{list-style:none;margin:0;padding:0}
 .themes li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px var(--s-4);padding:var(--s-3) 0;border-bottom:var(--border)}
 .themes li:hover{background:var(--surface-warm)}
@@ -354,6 +368,9 @@ a.card:hover{border-color:var(--ink)}
   .with-aside{grid-template-columns:var(--col-main) var(--col-side)}
   .visit{grid-template-columns:var(--col-side) var(--col-main);align-items:start}
   .aside{display:block;position:sticky;top:132px;align-self:start}
+  .tabs{--header-h:115px}
+  .with-tabs .aside{top:180px}
+  .fiche__section{--header-h:115px}
   .sticky-cta{display:none}
   .wa-float{bottom:var(--s-5)}
   .doors{grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--s-6);border-top:0}

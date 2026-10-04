@@ -104,7 +104,9 @@ export default async function DomainPage({ params }: Props) {
                   {g.items.map((t) => (
                     <li key={t.id}>
                       <span>
-                        {t.title}
+                        {t.detailPublished && t.slug ? (
+                          <Link className="themes__title-link" href={`/formations/${domain.slug}/${t.slug}`}>{t.title}</Link>
+                        ) : t.title}
                         {(t.badges ?? []).map((b) => (
                           <span key={b} className="badge">{TRAINING_BADGE_LABELS[b as TrainingBadge]}</span>
                         ))}

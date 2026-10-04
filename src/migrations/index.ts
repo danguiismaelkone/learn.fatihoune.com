@@ -4,6 +4,7 @@ import * as migration_20261003_064500_hero_variant_search from './20261003_06450
 import * as migration_20261004_124139_lot2_training_badges from './20261004_124139_lot2_training_badges';
 import * as migration_20261004_133717_lot1_callback_socials from './20261004_133717_lot1_callback_socials';
 import * as migration_20261004_142020_lot4_lead_qualification from './20261004_142020_lot4_lead_qualification';
+import * as migration_20261004_142608_lot5_training_detail from './20261004_142608_lot5_training_detail';
 
 export const migrations = [
   {
@@ -34,6 +35,11 @@ export const migrations = [
   {
     up: migration_20261004_142020_lot4_lead_qualification.up,
     down: migration_20261004_142020_lot4_lead_qualification.down,
-    name: '20261004_142020_lot4_lead_qualification'
+    name: '20261004_142020_lot4_lead_qualification',
+  },
+  {
+    up: migration_20261004_142608_lot5_training_detail.up,
+    down: migration_20261004_142608_lot5_training_detail.down,
+    name: '20261004_142608_lot5_training_detail'
   },
 ];

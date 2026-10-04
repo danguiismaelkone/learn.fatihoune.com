@@ -320,7 +320,19 @@ export interface Training {
    * Affichées à côté de l’intitulé dans la page du domaine. Facultatif.
    */
   badges?: ('new' | 'popular' | 'certifying')[] | null;
+  /**
+   * Créée automatiquement à partir de l’intitulé. Ne la modifiez pas après publication de la fiche.
+   */
+  slug?: string | null;
+  /**
+   * Ouvre la page /formations/<domaine>/<fiche>. Exige public visé, objectifs et programme relus.
+   */
+  detailPublished?: boolean | null;
   audience?: string | null;
+  /**
+   * Laisser vide s’il n’y en a pas : la fiche affichera « Aucun prérequis ».
+   */
+  prerequisites?: string | null;
   objectives?: {
     root: {
       type: string;
@@ -336,6 +348,22 @@ export interface Training {
     };
     [k: string]: unknown;
   } | null;
+  program?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  draftNote?: string | null;
   status: 'draft' | 'published';
   /**
    * Plus petit = plus haut.
@@ -769,8 +797,13 @@ export interface TrainingsSelect<T extends boolean = true> {
   durationHours?: T;
   durationLabel?: T;
   badges?: T;
+  slug?: T;
+  detailPublished?: T;
   audience?: T;
+  prerequisites?: T;
   objectives?: T;
+  program?: T;
+  draftNote?: T;
   status?: T;
   order?: T;
   updatedAt?: T;

@@ -6,3 +6,16 @@ export const TRAINING_BADGE_LABELS: Record<TrainingBadge, string> = {
   popular: 'Très demandée',
   certifying: 'Certifiante',
 }
+
+export const slugify = (source: string) =>
+  source
+    .replace(/œ/g, 'oe')
+    .replace(/Œ/g, 'OE')
+    .replace(/æ/g, 'ae')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 80)
+    .replace(/-+$/g, '')
