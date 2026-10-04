@@ -44,7 +44,7 @@ export const getPopularTrainings = cache(async (limit = 6) => {
     where: { and: [published, { badges: { in: ['popular'] } }] },
     sort: 'order',
     limit,
-    depth: 1,
+    depth: 2, // domain and its photo, used on the home page cards
     overrideAccess: false,
   })
   return docs.filter((t) => typeof t.domain === 'object' && t.domain.status === 'published')

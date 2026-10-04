@@ -2,6 +2,7 @@ import Link from 'next/link'
 import type { Media as MediaDoc, Page, SiteSetting, TrainingDomain } from '@/payload-types'
 import { Eyebrow, Heading, Media, Section, mediaFromDoc } from '@/components/primitives'
 import { CtaButton } from '@/components/ui/CtaButton'
+import { ClockIcon } from '@/components/ui/icons'
 import { SearchForm } from '@/components/ui/SearchForm'
 import { contactHref, type CtaKind } from '@/components/ui/cta'
 import { RichText } from '@/components/ui/RichText'
@@ -55,24 +56,35 @@ async function DomainIndex({ title, ctx }: { title: string; ctx: Ctx }) {
         <div className="motif domain-chips__band" aria-hidden="true" />
       </Section>
       {popular.length ? (
-        <Section tone="white" labelledBy="popular-title">
-          <div className="stack">
+        <Section tone="warm" labelledBy="popular-title">
+          <div className="stack stack--lg">
             <Heading id="popular-title">Les formations les plus demandées</Heading>
-            <ul className="themes">
+            <ul className="course-cards">
               {popular.map((t) => {
                 const domain = t.domain as TrainingDomain
+                const page = t.detailPublished && t.slug ? `/formations/${domain.slug}/${t.slug}` : null
+                const photo = mediaFromDoc(typeof domain.image === 'object' ? (domain.image as MediaDoc | null) : null, '(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw')
                 return (
-                  <li key={t.id}>
-                    <span>
-                      {t.detailPublished && t.slug ? (
-                        <Link className="themes__title-link" href={`/formations/${domain.slug}/${t.slug}`}>{t.title}</Link>
-                      ) : t.title}
-                      <Link className="themes__domain" href={`/formations/${domain.slug}`}>{domain.title}</Link>
-                    </span>
-                    <span className="themes__duration">{t.durationLabel ?? ''}</span>
-                    <Link className="link themes__ask" href={contactHref('quote', `${domain.title} › ${t.title}`, ctx.from)}>
-                      Demander cette formation<span className="sr-only"> : {t.title}</span>
-                    </Link>
+                  <li key={t.id} className="course-card">
+                    {photo ? <Media {...photo} alt="" /> : <Media placeholder="photo à venir" />}
+                    <div className="course-card__body">
+                      <Link className="course-card__domain" href={`/formations/${domain.slug}`}>{domain.title}</Link>
+                      <h3 className="course-card__title">
+                        {page ? <Link href={page}>{t.title}</Link> : t.title}
+                      </h3>
+                      {page && t.audience ? <p className="course-card__lead">Pour : {t.audience}</p> : null}
+                      {t.durationLabel ? (
+                        <p className="course-card__meta"><ClockIcon className="course-card__icon" /> {t.durationLabel}</p>
+                      ) : null}
+                      <div className="course-card__foot">
+                        {page ? (
+                          <Link className="btn btn--primary btn--compact" href={page}>Voir la formation<span className="sr-only"> : {t.title}</span></Link>
+                        ) : (
+                          <Link className="btn btn--primary btn--compact" href={contactHref('quote', `${domain.title} › ${t.title}`, ctx.from)}>Demander un devis<span className="sr-only"> : {t.title}</span></Link>
+                        )}
+                        <span className="course-card__price">Sur devis · FDFP</span>
+                      </div>
+                    </div>
                   </li>
                 )
               })}
