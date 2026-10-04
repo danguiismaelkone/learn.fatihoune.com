@@ -4,6 +4,7 @@ import { headers } from 'next/headers'
 import { cms } from '@/lib/cms'
 import {
   CALLBACK_SLOT_LABELS,
+  TRAINING_LOCATION_LABELS,
   readCallback,
   readLead,
   validateCallback,
@@ -13,6 +14,7 @@ import {
   type CallbackSlot,
   type LeadErrors,
   type LeadInput,
+  type TrainingLocation,
 } from '@/lib/lead'
 
 export type SubmitState =
@@ -34,7 +36,7 @@ function rateLimited(ip: string) {
   return recent.length > MAX_PER_WINDOW
 }
 
-const TYPE_LABEL = { quote: 'Devis entreprise', info: 'Information', partnership: 'Partenariat', callback: 'Demande de rappel' } as const
+const TYPE_LABEL = { quote: 'Devis entreprise', info: 'Information', partnership: 'Partenariat', callback: 'Demande de rappel', advice: 'Besoin de conseil' } as const
 
 type LeadData = {
   type: keyof typeof TYPE_LABEL
@@ -45,6 +47,8 @@ type LeadData = {
   email?: string
   topic?: string
   participants?: number
+  trainingLocation?: TrainingLocation
+  fdfpFunding?: boolean
   callbackSlot?: CallbackSlot
   message: string
   sourcePage: string
@@ -95,6 +99,8 @@ async function storeLead(data: LeadData): Promise<boolean> {
           data.callbackSlot ? `Rappel souhaité : ${CALLBACK_SLOT_LABELS[data.callbackSlot]}` : null,
           data.topic ? `Sujet : ${data.topic}` : null,
           data.participants ? `Participants : ${data.participants}` : null,
+          data.trainingLocation ? `Lieu souhaité : ${TRAINING_LOCATION_LABELS[data.trainingLocation]}` : null,
+          data.fdfpFunding ? 'Financement FDFP envisagé : oui' : null,
           `Page d’origine : ${sourcePage}`,
           '',
           data.message,
@@ -140,6 +146,9 @@ export async function submitLead(_prev: SubmitState, form: FormData): Promise<Su
     email: values.email.trim() || undefined,
     topic: values.topic.trim() || undefined,
     participants: values.participants.trim() ? Number(values.participants) : undefined,
+    // Location and FDFP only qualify quote requests.
+    trainingLocation: values.type === 'quote' && values.location ? (values.location as TrainingLocation) : undefined,
+    fdfpFunding: values.type === 'quote' ? values.fdfp : undefined,
     message: values.message.trim(),
     sourcePage: values.sourcePage || 'contact',
     consent: values.consent,

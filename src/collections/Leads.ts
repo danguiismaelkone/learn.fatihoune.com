@@ -1,7 +1,14 @@
 import type { CollectionConfig, PayloadHandler } from 'payload'
 import { hasRole, isStaff, nobody } from '../access'
 import { writeAudit, auditAfterChange } from '../hooks/audit'
-import { CALLBACK_SLOTS, CALLBACK_SLOT_LABELS, type CallbackSlot } from '../lib/lead'
+import {
+  CALLBACK_SLOTS,
+  CALLBACK_SLOT_LABELS,
+  TRAINING_LOCATIONS,
+  TRAINING_LOCATION_LABELS,
+  type CallbackSlot,
+  type TrainingLocation,
+} from '../lib/lead'
 
 export const LEAD_STATUSES = ['new', 'in_progress', 'done', 'archived'] as const
 export type LeadStatus = (typeof LEAD_STATUSES)[number]
@@ -87,9 +94,9 @@ const exportCsv: PayloadHandler = async (req) => {
     req,
     overrideAccess: false,
   })
-  const header = ['Date', 'Type', 'Statut', 'Nom', 'Organisme', 'Fonction', 'Téléphone', 'E-mail', 'Sujet', 'Participants', 'Rappel', 'Message', 'Page d’origine']
+  const header = ['Date', 'Type', 'Statut', 'Nom', 'Organisme', 'Fonction', 'Téléphone', 'E-mail', 'Sujet', 'Participants', 'Lieu', 'FDFP envisagé', 'Rappel', 'Message', 'Page d’origine']
   const rows = docs.map((d) =>
-    [d.createdAt, d.type, STATUS_LABELS[d.status as LeadStatus], d.name, d.company, d.jobTitle, d.phone, d.email, d.topic, d.participants, d.callbackSlot ? CALLBACK_SLOT_LABELS[d.callbackSlot as CallbackSlot] : '', d.message, d.tracking?.sourcePage]
+    [d.createdAt, d.type, STATUS_LABELS[d.status as LeadStatus], d.name, d.company, d.jobTitle, d.phone, d.email, d.topic, d.participants, d.trainingLocation ? TRAINING_LOCATION_LABELS[d.trainingLocation as TrainingLocation] : '', d.fdfpFunding ? 'oui' : '', d.callbackSlot ? CALLBACK_SLOT_LABELS[d.callbackSlot as CallbackSlot] : '', d.message, d.tracking?.sourcePage]
       .map(csvCell)
       .join(';'),
   )
@@ -157,6 +164,7 @@ export const Leads: CollectionConfig = {
         { label: 'Information', value: 'info' },
         { label: 'Partenariat', value: 'partnership' },
         { label: 'Demande de rappel', value: 'callback' },
+        { label: 'Besoin de conseil', value: 'advice' },
       ],
     },
     {
@@ -178,6 +186,15 @@ export const Leads: CollectionConfig = {
     { type: 'row', fields: [
       { name: 'topic', label: 'Formation ou sujet', type: 'text' },
       { name: 'participants', label: 'Nombre de participants', type: 'number' },
+    ] },
+    { type: 'row', admin: { condition: (data) => data?.type === 'quote' }, fields: [
+      {
+        name: 'trainingLocation',
+        label: 'Lieu souhaité',
+        type: 'select',
+        options: TRAINING_LOCATIONS.map((value) => ({ value, label: TRAINING_LOCATION_LABELS[value] })),
+      },
+      { name: 'fdfpFunding', label: 'Financement FDFP envisagé', type: 'checkbox' },
     ] },
     { name: 'message', label: 'Message', type: 'textarea', required: true },
     { name: 'internalNote', label: 'Note interne (jamais envoyée au client)', type: 'textarea' },

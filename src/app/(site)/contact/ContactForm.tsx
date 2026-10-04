@@ -2,15 +2,16 @@
 
 import Link from 'next/link'
 import { useActionState, useState } from 'react'
-import { validateLead, type LeadErrors, type LeadInput, type LeadType } from '@/lib/lead'
+import { TRAINING_LOCATIONS, TRAINING_LOCATION_LABELS, validateLead, type LeadErrors, type LeadInput, type LeadType } from '@/lib/lead'
 import { submitLead, type SubmitState } from './actions'
 
 type Props = { initialType: LeadType; initialTopic: string; sourcePage: string; whatsappUrl: string; responseDelay?: string | null }
 
-const TYPES: { value: LeadType; label: string }[] = [
-  { value: 'quote', label: 'Un devis pour mon entreprise' },
-  { value: 'info', label: 'Une information (formation, certificat, programme)' },
-  { value: 'partnership', label: 'Un partenariat' },
+const TYPES: { value: LeadType; label: string; hint: string }[] = [
+  { value: 'quote', label: 'Un devis pour mon entreprise', hint: 'Former une équipe : thème, effectif, lieu.' },
+  { value: 'info', label: 'Une information', hint: 'Une formation, un certificat, un programme.' },
+  { value: 'partnership', label: 'Un partenariat', hint: 'Programmes, institutions, associations.' },
+  { value: 'advice', label: 'Je ne sais pas encore', hint: 'Un conseiller vous aide à définir votre besoin.' },
 ]
 
 export function ContactForm({ initialType, initialTopic, sourcePage, whatsappUrl, responseDelay }: Props) {
@@ -41,7 +42,7 @@ export function ContactForm({ initialType, initialTopic, sourcePage, whatsappUrl
     if (!field) return
     const all = validateLead({
       type, name: String(fd.get('name') ?? ''), company: String(fd.get('company') ?? ''), jobTitle: '', phone: String(fd.get('phone') ?? ''),
-      email: String(fd.get('email') ?? ''), topic: '', participants: String(fd.get('participants') ?? ''), message: String(fd.get('message') ?? ''),
+      email: String(fd.get('email') ?? ''), topic: '', participants: String(fd.get('participants') ?? ''), location: String(fd.get('location') ?? ''), fdfp: false, message: String(fd.get('message') ?? ''),
       consent: fd.get('consent') === 'on', sourcePage,
     })
     const key = (field === 'phone' || field === 'email') && all.contact ? 'contact' : (field as keyof LeadErrors)
@@ -68,11 +69,15 @@ export function ContactForm({ initialType, initialTopic, sourcePage, whatsappUrl
         <p className="field__error" role="alert">Votre demande n’est pas encore complète : corrigez les champs signalés.</p>
       ) : null}
 
-      <fieldset className="radios">
+      <fieldset className="radios radios--cards">
         <legend className="legend" style={{ marginBottom: 6 }}>Votre demande concerne :</legend>
         {TYPES.map((t) => (
           <label key={t.value} className="radio">
-            <input type="radio" name="type" value={t.value} checked={type === t.value} onChange={() => setType(t.value)} /> {t.label}
+            <input type="radio" name="type" value={t.value} checked={type === t.value} onChange={() => setType(t.value)} aria-describedby={`type-hint-${t.value}`} />
+            <span className="radio__text">
+              <strong>{t.label}</strong>
+              <span className="field__hint" id={`type-hint-${t.value}`}>{t.hint}</span>
+            </span>
           </label>
         ))}
       </fieldset>
@@ -84,7 +89,7 @@ export function ContactForm({ initialType, initialTopic, sourcePage, whatsappUrl
       </div>
       {type !== 'info' ? (
         <div className="field">
-          <label className="field__label" htmlFor="company">Entreprise ou organisme</label>
+          <label className="field__label" htmlFor="company">Entreprise ou organisme{type === 'advice' ? <span className="field__hint"> (facultatif)</span> : null}</label>
           <input className="input" id="company" name="company" autoComplete="organization" required defaultValue={values.company} aria-invalid={Boolean(errors.company)} aria-describedby={described('company')} />
           {err('company')}
         </div>
@@ -116,6 +121,24 @@ export function ContactForm({ initialType, initialTopic, sourcePage, whatsappUrl
           <label className="field__label" htmlFor="participants">Nombre de participants <span className="field__hint">(une estimation suffit)</span></label>
           <input className="input" id="participants" name="participants" inputMode="numeric" defaultValue={values.participants} aria-invalid={Boolean(errors.participants)} aria-describedby={described('participants')} style={{ maxWidth: '10rem' }} />
           {err('participants')}
+        </div>
+      ) : null}
+      {type === 'quote' ? (
+        <div className="field">
+          <label className="field__label" htmlFor="location">Lieu souhaité <span className="field__hint">(facultatif)</span></label>
+          <select className="input" id="location" name="location" defaultValue={values.location ?? ''} aria-invalid={Boolean(errors.location)} aria-describedby={described('location')} style={{ maxWidth: '22rem' }}>
+            <option value="">Choisir…</option>
+            {TRAINING_LOCATIONS.map((l) => <option key={l} value={l}>{TRAINING_LOCATION_LABELS[l]}</option>)}
+          </select>
+          {err('location')}
+        </div>
+      ) : null}
+      {type === 'quote' ? (
+        <div className="field">
+          <label className="consent">
+            <input type="checkbox" name="fdfp" defaultChecked={values.fdfp} />
+            <span>Je souhaite faire financer cette formation par le FDFP. <Link className="link" href="/financement-fdfp">Comment ça marche</Link></span>
+          </label>
         </div>
       ) : null}
       <div className="field">
