@@ -23,6 +23,9 @@ export async function Footer() {
             <span>WhatsApp {s.whatsappDisplay}</span>
             <a href={`mailto:${s.email}`}>{s.email}</a>
             <span className="footer__muted" style={{ whiteSpace: 'pre-line' }}>{s.address}</span>
+            <a href={`https://www.google.com/maps/search/${encodeURIComponent(s.address.replace(/\n/g, ' '))}`} target="_blank" rel="noopener noreferrer">
+              Itinéraire Google Maps
+            </a>
             {s.hours ? <span className="footer__muted">{s.hours}</span> : null}
           </address>
         </div>

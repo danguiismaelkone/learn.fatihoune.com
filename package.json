@@ -20,6 +20,7 @@
     "seed:drafts": "cross-env NODE_OPTIONS=--no-deprecation payload run src/seed/training-drafts.ts",
     "seed:navigation": "cross-env NODE_OPTIONS=--no-deprecation payload run src/seed/navigation-run.ts",
     "seed:home-cards": "cross-env NODE_OPTIONS=--no-deprecation payload run src/seed/home-cards-run.ts",
+    "seed:home-order": "cross-env NODE_OPTIONS=--no-deprecation payload run src/seed/home-order-run.ts",
     "typecheck": "tsc --noEmit",
     "seed:if-empty": "cross-env NODE_OPTIONS=--no-deprecation SEED_IF_EMPTY=true payload run src/seed/index.ts"
   },

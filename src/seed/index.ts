@@ -7,6 +7,7 @@ import config from '@payload-config'
 import domains from './domains.json' with { type: 'json' }
 import { pages } from './pages'
 import { applyHomeCards } from './home-cards'
+import { applyHomeOrder } from './home-order'
 import { applyNavigation } from './navigation'
 import { rich } from './lexical'
 import images from './images.json' with { type: 'json' }
@@ -199,6 +200,7 @@ log(`${pages.length} pages`)
 // --- Menus « Solutions » / « Vous êtes », search, Digitalisation highlight (fresh installs: published) ---
 for (const line of await applyNavigation(payload, { publish: true })) log(line)
 for (const line of await applyHomeCards(payload)) log(line)
+for (const line of await applyHomeOrder(payload)) log(line)
 
 log('done')
 process.exit(0)
