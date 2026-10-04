@@ -82,6 +82,11 @@ button,input,textarea,select{font:inherit;color:inherit}
 .section--ink{background:var(--ink);color:var(--white);padding-bottom:0}
 .section--ink .heading{color:var(--white)}
 .section--ink .link{color:var(--white)}
+/* Brand section: FATIHOUNE red (charter: « le rouge pour attirer l'œil »). White bold text on #E10F23 ≈ 4.9:1. */
+.section--brand{background:var(--primary);color:var(--white);padding-bottom:0}
+.section--brand .heading{color:var(--white)}
+.section--brand .link{color:var(--white)}
+.section--brand .domain-chips a:focus-visible{outline:2px solid var(--white);outline-offset:3px}
 .section--ruled{border-top:var(--rule)}
 .section--tight{padding-block:var(--s-6)}
 .stack{display:flex;flex-direction:column;gap:var(--s-4)}

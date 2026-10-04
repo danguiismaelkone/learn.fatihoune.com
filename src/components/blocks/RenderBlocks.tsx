@@ -32,7 +32,7 @@ async function DomainIndex({ title, ctx }: { title: string; ctx: Ctx }) {
   const total = [...counts.values()].reduce((a, b) => a + b, 0)
   return (
     <>
-      <Section tone="ink">
+      <Section tone="brand">
         <div className="stack stack--lg">
           <div className="cluster" style={{ justifyContent: 'space-between' }}>
             <Heading>{title}</Heading>
