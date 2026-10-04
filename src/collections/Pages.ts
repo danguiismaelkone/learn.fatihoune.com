@@ -33,7 +33,11 @@ export const Pages: CollectionConfig = {
       name: 'parentLabel',
       label: 'Rubrique parente (fil d’Ariane)',
       type: 'select',
-      options: [{ label: 'Programmes', value: 'programmes' }],
+      options: [
+        { label: 'Programmes', value: 'programmes' },
+        { label: 'Solutions', value: 'solutions' },
+        { label: 'Vous êtes', value: 'vous-etes' },
+      ],
       admin: { position: 'sidebar' },
     },
     { name: 'layout', label: 'Contenu de la page', type: 'blocks', blocks: pageBlocks, required: true },

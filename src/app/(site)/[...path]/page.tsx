@@ -38,7 +38,12 @@ export default async function ContentPage({ params }: Props) {
   if (joined === 'accueil') notFound()
   const [page, settings] = await Promise.all([getPageByPath(joined), getSiteSettings()])
   if (!page) notFound()
-  const crumbs: Crumb[] = page.parentLabel === 'programmes' ? [{ label: 'Programmes', href: '/programmes' }, { label: page.title }] : [{ label: page.title }]
+  const parent: Record<string, Crumb> = {
+    programmes: { label: 'Programmes', href: '/programmes' },
+    solutions: { label: 'Solutions', href: '/solutions' },
+    'vous-etes': { label: 'Vous êtes' },
+  }
+  const crumbs: Crumb[] = page.parentLabel && parent[page.parentLabel] ? [parent[page.parentLabel], { label: page.title }] : [{ label: page.title }]
   const sticky = page.stickyCta && page.stickyCta !== 'none' ? STICKY[page.stickyCta] : null
   return (
     <>

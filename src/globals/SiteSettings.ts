@@ -43,6 +43,18 @@ export const SiteSettings: GlobalConfig = {
           { name: 'source', label: 'Source (interne, obligatoire)', type: 'text', required: true },
         ] },
       ] },
+      { label: 'Menu et recherche', fields: [
+        { name: 'popularSearches', label: 'Recherches populaires (fenêtre de recherche)', type: 'array', maxRows: 8, admin: { description: 'Pastilles proposées à l’ouverture de la recherche. 3 à 6 termes courts.' }, fields: [
+          { name: 'term', label: 'Terme', type: 'text', required: true },
+        ] },
+        { name: 'featuredSolution', label: 'Solution mise en avant (menu « Solutions »)', type: 'group', fields: [
+          { name: 'eyebrow', label: 'Surtitre', type: 'text' },
+          { name: 'title', label: 'Titre', type: 'text' },
+          { name: 'text', label: 'Phrase', type: 'textarea' },
+          { name: 'href', label: 'Lien', type: 'text', admin: { description: 'Ex. /digitalisation' } },
+          { name: 'image', label: 'Photo', type: 'upload', relationTo: 'media' },
+        ] },
+      ] },
       { label: 'Documents', fields: [
         { name: 'catalogPdf', label: 'Catalogue des formations (PDF)', type: 'upload', relationTo: 'media' },
         { name: 'presentationPdf', label: 'Présentation de FATIHOUNE (PDF)', type: 'upload', relationTo: 'media' },
