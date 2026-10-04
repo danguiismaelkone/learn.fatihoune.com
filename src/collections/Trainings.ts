@@ -72,6 +72,13 @@ export const Trainings: CollectionConfig = {
       ],
     },
     {
+      name: 'image',
+      label: 'Photo',
+      type: 'upload',
+      relationTo: 'media',
+      admin: { description: 'Facultatif. Utilisée sur la carte de l’accueil et sur la fiche ; à défaut, la photo du domaine.' },
+    },
+    {
       name: 'badges',
       label: 'Étiquettes',
       type: 'select',

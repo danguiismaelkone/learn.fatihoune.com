@@ -63,7 +63,10 @@ async function DomainIndex({ title, ctx }: { title: string; ctx: Ctx }) {
               {popular.map((t) => {
                 const domain = t.domain as TrainingDomain
                 const page = t.detailPublished && t.slug ? `/formations/${domain.slug}/${t.slug}` : null
-                const photo = mediaFromDoc(typeof domain.image === 'object' ? (domain.image as MediaDoc | null) : null, '(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw')
+                // The training's own photo first, then its domain's.
+                const own = typeof t.image === 'object' ? (t.image as MediaDoc | null) : null
+                const fallback = typeof domain.image === 'object' ? (domain.image as MediaDoc | null) : null
+                const photo = mediaFromDoc(own ?? fallback, '(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw')
                 return (
                   <li key={t.id} className="course-card">
                     {photo ? <Media {...photo} alt="" /> : <Media placeholder="photo à venir" />}

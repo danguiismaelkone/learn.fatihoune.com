@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs'
-import { Eyebrow, Heading } from '@/components/primitives'
+import { Eyebrow, Heading, Media, mediaFromDoc } from '@/components/primitives'
 import { ChatIcon } from '@/components/ui/icons'
 import { RichText } from '@/components/ui/RichText'
 import { StickyCta } from '@/components/ui/StickyCta'
@@ -11,6 +11,7 @@ import { siteConfig } from '@/config/site'
 import { getSiteSettings } from '@/content/queries/settings'
 import { getPublishedTrainingDetails, getTrainingDetail } from '@/content/queries/trainings'
 import { TRAINING_BADGE_LABELS, type TrainingBadge } from '@/lib/training'
+import type { Media as MediaDoc } from '@/payload-types'
 
 export const revalidate = 300
 type Props = { params: Promise<{ slug: string; theme: string }> }
@@ -46,6 +47,8 @@ export default async function TrainingPage({ params }: Props) {
   const domain = t.domain
   const from = `formations/${domain.slug}/${t.slug}`
   const quote = contactHref('quote', `${domain.title} › ${t.title}`, from)
+
+  const photo = mediaFromDoc(typeof t.image === 'object' ? (t.image as MediaDoc | null) : null, '(min-width: 1024px) 33vw, 100vw')
 
   const practical = (
     <dl className="info__list">
@@ -142,6 +145,7 @@ export default async function TrainingPage({ params }: Props) {
         </div>
 
         <aside className="aside" aria-label="Informations pratiques">
+          {photo ? <div style={{ marginBottom: 'var(--s-4)' }}><Media {...photo} /></div> : null}
           <div className="aside__box info">
             <Eyebrow>Informations pratiques</Eyebrow>
             {practical}
