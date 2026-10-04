@@ -112,14 +112,35 @@ export function Stats({ settings }: { settings: SiteSetting }) {
 
 async function ReferencesTeaser({ block, ctx }: { block: Extract<Block, { blockType: 'referencesTeaser' }>; ctx: Ctx }) {
   const refs = await getCitableReferences()
+  // Cegos-style trust block: centred wall (logo when uploaded, otherwise the name), button, then the key-figure tiles.
   return (
     <Section tone="white" ruled>
-      <div className="stack stack--lg">
-        <Heading>{block.title}</Heading>
-        {block.intro ? <p className="text text--soft">{block.intro}</p> : null}
+      <div className="stack stack--lg trust">
+        <div className="stack stack--sm">
+          <Heading>{block.title}</Heading>
+          {block.intro ? <p className="text text--soft">{block.intro}</p> : null}
+        </div>
+        {refs.length >= 4 ? (
+          <ul className="trust-wall">
+            {refs.slice(0, 12).map((r) => {
+              const logo = typeof r.logo === 'object' ? (r.logo as MediaDoc | null) : null
+              return (
+                <li key={r.id}>
+                  {logo?.url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={logo.sizes?.card?.url || logo.url} alt={r.name} loading="lazy" decoding="async" />
+                  ) : (
+                    <span>{r.name}</span>
+                  )}
+                </li>
+              )
+            })}
+          </ul>
+        ) : null}
+        <div className="trust__cta">
+          <Link className="btn btn--primary" href="/references">Voir nos {refs.length} références</Link>
+        </div>
         {block.showStats ? <Stats settings={ctx.settings} /> : null}
-        {refs.length >= 4 ? <ul className="clients">{refs.slice(0, 8).map((r) => <li key={r.id}>{r.name}</li>)}</ul> : null}
-        <Link className="link" href="/references">Voir nos {refs.length} références</Link>
       </div>
     </Section>
   )
