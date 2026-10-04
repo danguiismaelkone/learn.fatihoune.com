@@ -50,11 +50,13 @@ export default buildConfig({
   }),
   email: smtpConfigured
     ? nodemailerAdapter({
-        defaultFromAddress: process.env.SMTP_FROM || 'site@fatihoune.com',
+        defaultFromAddress: process.env.SMTP_FROM || process.env.SMTP_USER || 'infos@fatihoune.com',
         defaultFromName: 'Site FATIHOUNE Formation',
         transportOptions: {
           host: process.env.SMTP_HOST,
           port: Number(process.env.SMTP_PORT || 587),
+          // 465 = implicit TLS (e.g. OVH ssl0.ovh.net); 587 = STARTTLS.
+          secure: Number(process.env.SMTP_PORT || 587) === 465,
           auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
         },
       })

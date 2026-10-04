@@ -9,6 +9,7 @@ import * as migration_20261004_150246_training_image from './20261004_150246_tra
 import * as migration_20261004_181542_navigation_search from './20261004_181542_navigation_search';
 import * as migration_20261004_190657_home_photo_cards_band from './20261004_190657_home_photo_cards_band';
 import * as migration_20261004_191542_list_style from './20261004_191542_list_style';
+import * as migration_20261004_203920_visitor_confirmation from './20261004_203920_visitor_confirmation';
 
 export const migrations = [
   {
@@ -64,6 +65,11 @@ export const migrations = [
   {
     up: migration_20261004_191542_list_style.up,
     down: migration_20261004_191542_list_style.down,
-    name: '20261004_191542_list_style'
+    name: '20261004_191542_list_style',
+  },
+  {
+    up: migration_20261004_203920_visitor_confirmation.up,
+    down: migration_20261004_203920_visitor_confirmation.down,
+    name: '20261004_203920_visitor_confirmation'
   },
 ];

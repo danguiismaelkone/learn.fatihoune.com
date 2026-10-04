@@ -115,12 +115,48 @@ async function storeLead(data: LeadData): Promise<boolean> {
       payload.logger.error({ err: error, msg: 'Lead notification failed', leadId })
     }
   }
+  // Acknowledge receipt to the visitor. Deliberately generic: the form must not become a relay that
+  // sends arbitrary visitor-typed text (message, topic) to any address typed in the e-mail field.
+  let confirmation: 'sent' | 'failed' | 'not_configured' | 'no_email' = data.email ? 'not_configured' : 'no_email'
+  let confirmationError: string | undefined
+  if (process.env.SMTP_HOST && data.email) {
+    const contact = [
+      settings.phone ? `Téléphone : ${settings.phone}` : null,
+      settings.whatsappDisplay ? `WhatsApp : ${settings.whatsappDisplay}` : null,
+      settings.email ? `E-mail : ${settings.email}` : null,
+    ].filter((l) => l !== null)
+    try {
+      await payload.sendEmail({
+        to: data.email,
+        replyTo: settings.email || recipients[0] || undefined,
+        subject: 'Nous avons bien reçu votre demande — FATIHOUNE Formation',
+        text: [
+          `Bonjour ${data.name.slice(0, 80)},`,
+          '',
+          `Nous avons bien reçu votre demande (${TYPE_LABEL[data.type].toLowerCase()}) envoyée depuis notre site.`,
+          `Notre équipe vous recontacte ${settings.responseDelay || 'rapidement'}.`,
+          '',
+          ...(contact.length ? ['Pour toute question d’ici là, vous pouvez répondre à cet e-mail ou nous joindre :', ...contact, ''] : []),
+          'L’équipe FATIHOUNE Formation',
+          process.env.NEXT_PUBLIC_SITE_URL ?? '',
+          '',
+          'Vous recevez cet e-mail parce que votre adresse a été saisie dans le formulaire de contact de notre site.',
+          'Si vous n’êtes pas à l’origine de cette demande, ignorez simplement ce message.',
+        ].join('\n'),
+      })
+      confirmation = 'sent'
+    } catch (error) {
+      confirmation = 'failed'
+      confirmationError = (error as Error).message.slice(0, 200)
+      payload.logger.error({ err: error, msg: 'Lead confirmation failed', leadId })
+    }
+  }
   await payload.update({
     collection: 'leads',
     id: leadId,
     overrideAccess: true,
     context: { skipAudit: true },
-    data: { tracking: { sourcePage, consent, notification, notificationError } },
+    data: { tracking: { sourcePage, consent, notification, notificationError, confirmation, confirmationError } },
   })
   return true
 }

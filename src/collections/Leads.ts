@@ -212,6 +212,13 @@ export const Leads: CollectionConfig = {
           { label: 'Non configurée', value: 'not_configured' },
         ] },
         { name: 'notificationError', label: 'Erreur', type: 'text' },
+        { name: 'confirmation', label: 'Accusé de réception au visiteur', type: 'select', options: [
+          { label: 'Envoyé', value: 'sent' },
+          { label: 'Échec', value: 'failed' },
+          { label: 'Non configuré', value: 'not_configured' },
+          { label: 'Pas d’e-mail fourni', value: 'no_email' },
+        ] },
+        { name: 'confirmationError', label: 'Erreur (accusé de réception)', type: 'text' },
       ],
     },
   ],
