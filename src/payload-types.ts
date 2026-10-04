@@ -162,6 +162,8 @@ export interface Lead {
     consent?: boolean | null;
     notification?: ('sent' | 'failed' | 'not_configured') | null;
     notificationError?: string | null;
+    confirmation?: ('sent' | 'failed' | 'not_configured' | 'no_email') | null;
+    confirmationError?: string | null;
   };
   updatedAt: string;
   createdAt: string;
@@ -762,6 +764,8 @@ export interface LeadsSelect<T extends boolean = true> {
         consent?: T;
         notification?: T;
         notificationError?: T;
+        confirmation?: T;
+        confirmationError?: T;
       };
   updatedAt?: T;
   createdAt?: T;
