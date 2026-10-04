@@ -313,6 +313,10 @@ export interface Training {
    * Ex. « 30 h », « 5 jours ». Laisser vide si inconnue : rien ne s’affiche.
    */
   durationLabel?: string | null;
+  /**
+   * Affichées à côté de l’intitulé dans la page du domaine. Facultatif.
+   */
+  badges?: ('new' | 'popular' | 'certifying')[] | null;
   audience?: string | null;
   objectives?: {
     root: {
@@ -758,6 +762,7 @@ export interface TrainingsSelect<T extends boolean = true> {
   group?: T;
   durationHours?: T;
   durationLabel?: T;
+  badges?: T;
   audience?: T;
   objectives?: T;
   status?: T;

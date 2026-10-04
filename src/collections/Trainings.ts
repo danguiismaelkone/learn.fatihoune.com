@@ -3,6 +3,7 @@ import { isStaff, nobody, publishedOrStaff } from '../access'
 import { orderField, statusField } from '../fields/common'
 import { auditAfterChange } from '../hooks/audit'
 import { revalidateAfterChange } from '../hooks/revalidate'
+import { TRAINING_BADGES, TRAINING_BADGE_LABELS } from '../lib/training'
 
 export const Trainings: CollectionConfig = {
   slug: 'trainings',
@@ -45,6 +46,14 @@ export const Trainings: CollectionConfig = {
           admin: { description: 'Ex. « 30 h », « 5 jours ». Laisser vide si inconnue : rien ne s’affiche.' },
         },
       ],
+    },
+    {
+      name: 'badges',
+      label: 'Étiquettes',
+      type: 'select',
+      hasMany: true,
+      options: TRAINING_BADGES.map((value) => ({ value, label: TRAINING_BADGE_LABELS[value] })),
+      admin: { description: 'Affichées à côté de l’intitulé dans la page du domaine. Facultatif.' },
     },
     { name: 'audience', label: 'Public visé', type: 'text' },
     { name: 'objectives', label: 'Objectifs (fiche détaillée, plus tard)', type: 'richText' },

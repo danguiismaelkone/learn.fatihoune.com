@@ -2,14 +2,17 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs'
+import { Stats } from '@/components/blocks/RenderBlocks'
 import { Eyebrow, Heading, Media, mediaFromDoc } from '@/components/primitives'
 import { ChatIcon } from '@/components/ui/icons'
+import { OpenOnHash } from '@/components/ui/OpenOnHash'
 import { RichText } from '@/components/ui/RichText'
 import { StickyCta } from '@/components/ui/StickyCta'
 import { contactHref, whatsappHref } from '@/components/ui/cta'
 import { siteConfig } from '@/config/site'
 import { getSiteSettings } from '@/content/queries/settings'
 import { getDomainBySlug, getDomainTrainings, getDomains } from '@/content/queries/trainings'
+import { TRAINING_BADGE_LABELS, type TrainingBadge } from '@/lib/training'
 import type { Certificate, Media as MediaDoc } from '@/payload-types'
 
 export const revalidate = 300
@@ -63,13 +66,19 @@ export default async function DomainPage({ params }: Props) {
 
   return (
     <>
-      <Breadcrumbs items={[{ label: 'Formations', href: '/formations' }, { label: domain.title }]} />
+      <div className="domain-banner">
+        <Breadcrumbs tone="dark" items={[{ label: 'Formations', href: '/formations' }, { label: domain.title }]} />
+        <div className="container domain-banner__inner">
+          <Eyebrow>Domaine {String(index).padStart(2, '0')} · {total} formations</Eyebrow>
+          <Heading as="h1">{domain.h1}</Heading>
+          <p className="text">{domain.intro}</p>
+        </div>
+        <div className="motif domain-banner__band" aria-hidden="true" />
+      </div>
+      <OpenOnHash />
       <div className="container with-aside">
         <div className="stack stack--lg" style={{ minWidth: 0 }}>
           <div className="stack">
-            <Eyebrow>Domaine {String(index).padStart(2, '0')} · {total} formations</Eyebrow>
-            <Heading as="h1">{domain.h1}</Heading>
-            <p className="text text--soft">{domain.intro}</p>
             {photo ? <div className="only-mobile"><Media {...photo} priority /></div> : null}
             <ul className="proof" aria-label="Nos garanties">
               <li>Habilité FDFP</li><li>Sur mesure</li><li>En entreprise ou chez nous</li>
@@ -84,24 +93,32 @@ export default async function DomainPage({ params }: Props) {
             ) : null}
           </div>
 
-          {groups.map((g) => (
-            <section key={g.title} id={anchorId(g.title)} className="stack stack--sm" aria-labelledby={`g-${anchorId(g.title)}`}>
-              <h2 className="heading heading--2 group__title" id={`g-${anchorId(g.title)}`}>
-                {g.title} <span className="group__count">{g.items.length}</span>
-              </h2>
-              <ul className="themes">
-                {g.items.map((t) => (
-                  <li key={t.id}>
-                    <span>{t.title}</span>
-                    <span className="themes__duration">{t.durationLabel ?? ''}</span>
-                    <Link className="link themes__ask" href={contactHref('quote', `${domain.title} › ${t.title}`, from)}>
-                      Demander cette formation<span className="sr-only"> : {t.title}</span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ))}
+          <div className="groups">
+            {groups.map((g, i) => (
+              <details key={g.title} id={anchorId(g.title)} className="group" open={i === 0}>
+                <summary className="group__summary">
+                  <h2 className="group__title" id={`g-${anchorId(g.title)}`}>{g.title}</h2>
+                  <span className="group__count">{g.items.length} formation{g.items.length > 1 ? 's' : ''}</span>
+                </summary>
+                <ul className="themes" aria-labelledby={`g-${anchorId(g.title)}`}>
+                  {g.items.map((t) => (
+                    <li key={t.id}>
+                      <span>
+                        {t.title}
+                        {(t.badges ?? []).map((b) => (
+                          <span key={b} className="badge">{TRAINING_BADGE_LABELS[b as TrainingBadge]}</span>
+                        ))}
+                      </span>
+                      <span className="themes__duration">{t.durationLabel ?? ''}</span>
+                      <Link className="link themes__ask" href={contactHref('quote', `${domain.title} › ${t.title}`, from)}>
+                        Demander cette formation<span className="sr-only"> : {t.title}</span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            ))}
+          </div>
 
           {domain.extra ? <div className="callout"><RichText data={domain.extra} /></div> : null}
           {cert ? (
@@ -112,9 +129,14 @@ export default async function DomainPage({ params }: Props) {
             </div>
           ) : null}
 
-          <section className="stack stack--sm" aria-labelledby="adapt">
-            <Heading id="adapt">Une formation adaptée à votre équipe</Heading>
-            <p className="text">Chaque thème peut être adapté à votre secteur et à vos cas réels. Vous recevez une fiche technique détaillée pour chaque formation retenue. Votre formation peut être financée par le FDFP. <Link className="link" href="/financement-fdfp">Financement FDFP</Link></p>
+          <section className="stack" aria-labelledby="method">
+            <Heading id="method">Comment se passe une formation avec FATIHOUNE</Heading>
+            <ol className="steps">
+              <li><div className="stack stack--sm"><strong>On analyse votre besoin</strong><p className="text text--soft">Nos experts analysent la situation de votre équipe et les compétences à renforcer.</p></div></li>
+              <li><div className="stack stack--sm"><strong>On adapte le programme</strong><p className="text text--soft">Contenu, durée, lieu et calendrier : chaque thème est adapté à votre secteur et à vos cas réels. Vous recevez une fiche technique détaillée pour chaque formation retenue.</p></div></li>
+              <li><div className="stack stack--sm"><strong>On forme vos équipes</strong><p className="text text--soft">Dans vos locaux ou dans les nôtres. Votre formation peut être financée par le FDFP. <Link className="link" href="/financement-fdfp">Financement FDFP</Link></p></div></li>
+            </ol>
+            <Stats settings={settings} />
           </section>
 
           <nav aria-labelledby="others" className="stack stack--sm">
