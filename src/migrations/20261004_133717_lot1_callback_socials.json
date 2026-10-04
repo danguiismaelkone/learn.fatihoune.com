@@ -433,6 +433,73 @@
       "uniqueConstraints": {},
       "checkConstraints": {}
     },
+    "trainings_badges": {
+      "name": "trainings_badges",
+      "columns": {
+        "order": {
+          "name": "order",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "parent_id": {
+          "name": "parent_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "value": {
+          "name": "value",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "trainings_badges_order_idx": {
+          "name": "trainings_badges_order_idx",
+          "columns": [
+            "order"
+          ],
+          "isUnique": false
+        },
+        "trainings_badges_parent_idx": {
+          "name": "trainings_badges_parent_idx",
+          "columns": [
+            "parent_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "trainings_badges_parent_fk": {
+          "name": "trainings_badges_parent_fk",
+          "tableFrom": "trainings_badges",
+          "tableTo": "trainings",
+          "columnsFrom": [
+            "parent_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
     "trainings": {
       "name": "trainings",
       "columns": {
@@ -6111,6 +6178,6 @@
   "internal": {
     "indexes": {}
   },
-  "id": "377949d8-3ab5-429b-b054-da291d9710f7",
+  "id": "2014e322-5499-4827-b83a-daeb0955ce26",
   "prevId": "00000000-0000-0000-0000-000000000000"
 }

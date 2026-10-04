@@ -55,7 +55,7 @@ async function DomainIndex({ title }: { title: string }) {
   )
 }
 
-function Stats({ settings }: { settings: SiteSetting }) {
+export function Stats({ settings }: { settings: SiteSetting }) {
   if (!settings.keyFigures?.length) return null
   return (
     <ul className="stats">
