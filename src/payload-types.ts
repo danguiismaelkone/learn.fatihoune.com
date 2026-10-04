@@ -317,6 +317,10 @@ export interface Training {
    */
   durationLabel?: string | null;
   /**
+   * Facultatif. Utilisée sur la carte de l’accueil et sur la fiche ; à défaut, la photo du domaine.
+   */
+  image?: (number | null) | Media;
+  /**
    * Affichées à côté de l’intitulé dans la page du domaine. Facultatif.
    */
   badges?: ('new' | 'popular' | 'certifying')[] | null;
@@ -796,6 +800,7 @@ export interface TrainingsSelect<T extends boolean = true> {
   group?: T;
   durationHours?: T;
   durationLabel?: T;
+  image?: T;
   badges?: T;
   slug?: T;
   detailPublished?: T;
