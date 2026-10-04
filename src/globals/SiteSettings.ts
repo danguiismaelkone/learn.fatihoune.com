@@ -18,6 +18,17 @@ export const SiteSettings: GlobalConfig = {
         { name: 'address', label: 'Adresse', type: 'textarea', required: true },
         { name: 'hours', label: 'Horaires', type: 'text' },
         { name: 'responseDelay', label: 'Délai de réponse promis (facultatif)', type: 'text', admin: { description: 'Ex. « sous 48 h ouvrées ». Laisser vide tant qu’il n’est pas garanti.' } },
+        { name: 'socials', label: 'Réseaux sociaux (pied de page)', type: 'array', admin: { description: 'Uniquement les comptes actifs. Rien ne s’affiche tant que la liste est vide.' }, fields: [
+          { name: 'network', label: 'Réseau', type: 'select', required: true, options: [
+            { label: 'Facebook', value: 'facebook' },
+            { label: 'LinkedIn', value: 'linkedin' },
+            { label: 'Instagram', value: 'instagram' },
+            { label: 'YouTube', value: 'youtube' },
+            { label: 'TikTok', value: 'tiktok' },
+            { label: 'X', value: 'x' },
+          ] },
+          { name: 'url', label: 'Adresse de la page', type: 'text', required: true, validate: (v: unknown) => (typeof v === 'string' && /^https:\/\//.test(v) ? true : 'L’adresse doit commencer par https://') },
+        ] },
       ] },
       { label: 'Preuves', fields: [
         { name: 'accreditations', label: 'Agréments', type: 'array', fields: [

@@ -1,6 +1,7 @@
 import type { CollectionConfig, PayloadHandler } from 'payload'
 import { hasRole, isStaff, nobody } from '../access'
 import { writeAudit, auditAfterChange } from '../hooks/audit'
+import { CALLBACK_SLOTS, CALLBACK_SLOT_LABELS, type CallbackSlot } from '../lib/lead'
 
 export const LEAD_STATUSES = ['new', 'in_progress', 'done', 'archived'] as const
 export type LeadStatus = (typeof LEAD_STATUSES)[number]
@@ -86,9 +87,9 @@ const exportCsv: PayloadHandler = async (req) => {
     req,
     overrideAccess: false,
   })
-  const header = ['Date', 'Type', 'Statut', 'Nom', 'Organisme', 'Fonction', 'Téléphone', 'E-mail', 'Sujet', 'Participants', 'Message', 'Page d’origine']
+  const header = ['Date', 'Type', 'Statut', 'Nom', 'Organisme', 'Fonction', 'Téléphone', 'E-mail', 'Sujet', 'Participants', 'Rappel', 'Message', 'Page d’origine']
   const rows = docs.map((d) =>
-    [d.createdAt, d.type, STATUS_LABELS[d.status as LeadStatus], d.name, d.company, d.jobTitle, d.phone, d.email, d.topic, d.participants, d.message, d.tracking?.sourcePage]
+    [d.createdAt, d.type, STATUS_LABELS[d.status as LeadStatus], d.name, d.company, d.jobTitle, d.phone, d.email, d.topic, d.participants, d.callbackSlot ? CALLBACK_SLOT_LABELS[d.callbackSlot as CallbackSlot] : '', d.message, d.tracking?.sourcePage]
       .map(csvCell)
       .join(';'),
   )
@@ -155,7 +156,15 @@ export const Leads: CollectionConfig = {
         { label: 'Devis entreprise', value: 'quote' },
         { label: 'Information', value: 'info' },
         { label: 'Partenariat', value: 'partnership' },
+        { label: 'Demande de rappel', value: 'callback' },
       ],
+    },
+    {
+      name: 'callbackSlot',
+      label: 'Moment souhaité pour le rappel',
+      type: 'select',
+      options: CALLBACK_SLOTS.map((value) => ({ value, label: CALLBACK_SLOT_LABELS[value] })),
+      admin: { condition: (data) => data?.type === 'callback' },
     },
     { name: 'name', label: 'Nom et prénom', type: 'text', required: true },
     { type: 'row', fields: [

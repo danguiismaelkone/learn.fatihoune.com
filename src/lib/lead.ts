@@ -1,4 +1,4 @@
-/** Shared validation for the contact form — used by the browser and re-run on the server. */
+/** Shared validation for the contact and callback forms — used by the browser and re-run on the server. */
 export type LeadType = 'quote' | 'info' | 'partnership'
 export const LEAD_TYPES: LeadType[] = ['quote', 'info', 'partnership']
 
@@ -48,6 +48,47 @@ export function readLead(form: FormData): LeadInput {
     topic: s('topic'),
     participants: s('participants'),
     message: s('message'),
+    consent: form.get('consent') === 'on',
+    sourcePage: s('sourcePage'),
+  }
+}
+
+export const CALLBACK_SLOTS = ['morning', 'afternoon', 'anytime'] as const
+export type CallbackSlot = (typeof CALLBACK_SLOTS)[number]
+export const CALLBACK_SLOT_LABELS: Record<CallbackSlot, string> = {
+  morning: 'Le matin',
+  afternoon: 'L’après-midi',
+  anytime: 'Peu importe',
+}
+
+export type CallbackInput = {
+  name: string
+  phone: string
+  slot: CallbackSlot
+  topic: string
+  consent: boolean
+  sourcePage: string
+}
+
+export type CallbackErrors = Partial<Record<keyof CallbackInput, string>>
+
+export function validateCallback(v: CallbackInput): CallbackErrors {
+  const e: CallbackErrors = {}
+  if (v.name.trim().length < 2) e.name = 'Indiquez votre nom et votre prénom.'
+  if (!v.phone.trim()) e.phone = 'Indiquez le numéro auquel vous rappeler.'
+  else if (!PHONE.test(v.phone.trim())) e.phone = 'Ce numéro ne semble pas valide. Exemple : 07 09 90 16 47.'
+  if (!CALLBACK_SLOTS.includes(v.slot)) e.slot = 'Choisissez un moment pour le rappel.'
+  if (!v.consent) e.consent = 'Cochez cette case pour que nous puissions vous rappeler.'
+  return e
+}
+
+export function readCallback(form: FormData): CallbackInput {
+  const s = (k: string) => String(form.get(k) ?? '').slice(0, 200)
+  return {
+    name: s('name'),
+    phone: s('phone'),
+    slot: s('slot') as CallbackSlot,
+    topic: s('topic'),
     consent: form.get('consent') === 'on',
     sourcePage: s('sourcePage'),
   }

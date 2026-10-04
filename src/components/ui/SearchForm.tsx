@@ -1,4 +1,4 @@
-type Props = { defaultValue?: string; variant?: 'hero' | 'page'; id?: string }
+type Props = { defaultValue?: string; variant?: 'hero' | 'page' | 'util'; id?: string }
 
 /** Plain GET form: works without JavaScript and keeps the query in the URL (shareable, back button friendly). */
 export function SearchForm({ defaultValue = '', variant = 'page', id = 'search-q' }: Props) {
@@ -15,12 +15,12 @@ export function SearchForm({ defaultValue = '', variant = 'page', id = 'search-q
         name="q"
         type="search"
         defaultValue={defaultValue}
-        placeholder="Ex. Excel, management, ISO 45001, fiscalité…"
+        placeholder={variant === 'util' ? 'Rechercher une formation' : 'Ex. Excel, management, ISO 45001, fiscalité…'}
         autoComplete="off"
         enterKeyHint="search"
         maxLength={80}
       />
-      <button className="btn btn--primary search__button" type="submit">Rechercher</button>
+      <button className="btn btn--primary search__button" type="submit">{variant === 'util' ? 'OK' : 'Rechercher'}</button>
     </form>
   )
 }

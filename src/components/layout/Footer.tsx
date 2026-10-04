@@ -2,6 +2,10 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { getSiteSettings } from '@/content/queries/settings'
 
+const NETWORK_LABELS: Record<string, string> = {
+  facebook: 'Facebook', linkedin: 'LinkedIn', instagram: 'Instagram', youtube: 'YouTube', tiktok: 'TikTok', x: 'X',
+}
+
 export async function Footer() {
   const s = await getSiteSettings()
   const accreditations = (s.accreditations ?? []).map((a) => a.fullName).join(' · ')
@@ -42,6 +46,32 @@ export async function Footer() {
           <Link href="/confidentialite">Confidentialité</Link>
         </div>
       </div>
+      {s.accreditations?.length || s.socials?.length ? (
+        <div className="container footer__proof">
+          {s.accreditations?.length ? (
+            <div className="stack stack--sm">
+              <h2>Agréments et réseaux</h2>
+              <ul className="proof proof--dark">
+                {s.accreditations.map((a) => (
+                  <li key={a.id ?? a.name}>{a.name}</li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+          {s.socials?.length ? (
+            <div className="stack stack--sm">
+              <h2>Suivez-nous</h2>
+              <ul className="cluster footer__socials">
+                {s.socials.map((n) => (
+                  <li key={n.id ?? n.url}>
+                    <a href={n.url} target="_blank" rel="noopener noreferrer">{NETWORK_LABELS[n.network] ?? n.network}</a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+        </div>
+      ) : null}
     </footer>
   )
 }

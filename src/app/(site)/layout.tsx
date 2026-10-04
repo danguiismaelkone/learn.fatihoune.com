@@ -3,7 +3,9 @@ import { Arimo } from 'next/font/google'
 import type { ReactNode } from 'react'
 import { Footer } from '@/components/layout/Footer'
 import { Header } from '@/components/layout/Header'
+import { Callback } from '@/components/ui/Callback'
 import { ChatIcon } from '@/components/ui/icons'
+import { BackToTop } from '@/components/ui/ScrollAids'
 import { whatsappHref } from '@/components/ui/cta'
 import { isProduction, siteConfig } from '@/config/site'
 import { getSiteSettings } from '@/content/queries/settings'
@@ -43,7 +45,9 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
         <main id="contenu" tabIndex={-1}>
           {children}
         </main>
+        <Callback whatsappUrl={whatsappHref(settings.whatsapp)} />
         <Footer />
+        <BackToTop />
         <a
           className="wa-float"
           href={whatsappHref(settings.whatsapp)}

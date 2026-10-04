@@ -144,7 +144,8 @@ export interface UserAuthOperations {
 export interface Lead {
   id: number;
   status: 'new' | 'in_progress' | 'done' | 'archived';
-  type: 'quote' | 'info' | 'partnership';
+  type: 'quote' | 'info' | 'partnership' | 'callback';
+  callbackSlot?: ('morning' | 'afternoon' | 'anytime') | null;
   name: string;
   company?: string | null;
   jobTitle?: string | null;
@@ -697,6 +698,7 @@ export interface PayloadMigration {
 export interface LeadsSelect<T extends boolean = true> {
   status?: T;
   type?: T;
+  callbackSlot?: T;
   name?: T;
   company?: T;
   jobTitle?: T;
@@ -1107,6 +1109,16 @@ export interface SiteSetting {
    * Ex. « sous 48 h ouvrées ». Laisser vide tant qu’il n’est pas garanti.
    */
   responseDelay?: string | null;
+  /**
+   * Uniquement les comptes actifs. Rien ne s’affiche tant que la liste est vide.
+   */
+  socials?:
+    | {
+        network: 'facebook' | 'linkedin' | 'instagram' | 'youtube' | 'tiktok' | 'x';
+        url: string;
+        id?: string | null;
+      }[]
+    | null;
   accreditations?:
     | {
         name: string;
@@ -1145,6 +1157,13 @@ export interface SiteSettingsSelect<T extends boolean = true> {
   address?: T;
   hours?: T;
   responseDelay?: T;
+  socials?:
+    | T
+    | {
+        network?: T;
+        url?: T;
+        id?: T;
+      };
   accreditations?:
     | T
     | {
