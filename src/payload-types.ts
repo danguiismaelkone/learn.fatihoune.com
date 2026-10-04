@@ -505,13 +505,18 @@ export interface Page {
       }
     | {
         title?: string | null;
-        style?: ('cards' | 'doors') | null;
+        style?: ('cards' | 'doors' | 'photo') | null;
         items?:
           | {
               eyebrow?: string | null;
               title: string;
               text?: string | null;
               href: string;
+              /**
+               * Ex. « Voir les formations ». Par défaut : « En savoir plus ».
+               */
+              linkLabel?: string | null;
+              image?: (number | null) | Media;
               id?: string | null;
             }[]
           | null;
@@ -540,6 +545,7 @@ export interface Page {
               id?: string | null;
             }[]
           | null;
+        style?: ('section' | 'band') | null;
         id?: string | null;
         blockName?: string | null;
         blockType: 'demand';
@@ -951,6 +957,8 @@ export interface PagesSelect<T extends boolean = true> {
                     title?: T;
                     text?: T;
                     href?: T;
+                    linkLabel?: T;
+                    image?: T;
                     id?: T;
                   };
               id?: T;
@@ -977,6 +985,7 @@ export interface PagesSelect<T extends boolean = true> {
                     topic?: T;
                     id?: T;
                   };
+              style?: T;
               id?: T;
               blockName?: T;
             };
