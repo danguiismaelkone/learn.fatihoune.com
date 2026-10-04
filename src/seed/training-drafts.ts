@@ -33,7 +33,7 @@ for (const d of trainingDrafts) {
   if (!t.objectives) data.objectives = rich(d.objectives)
   if (!t.program) data.program = rich(d.program)
   if (!t.draftNote?.trim()) data.draftNote = NOTE
-  if (!t.slug) data.slug = '' // let the slug hook build it from the title
+  if (!t.slug) data.slug = t.title // the slug hook turns the title into a unique address
   if (!Object.keys(data).length) continue
   await payload.update({ collection: 'trainings', id: t.id, data, overrideAccess: true })
   filled++
