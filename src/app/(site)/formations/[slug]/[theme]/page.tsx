@@ -75,7 +75,6 @@ export default async function TrainingPage({ params }: Props) {
     <>
       <div className="domain-banner">
         <Breadcrumbs
-          tone="dark"
           items={[{ label: 'Formations', href: '/formations' }, { label: domain.title, href: `/formations/${domain.slug}` }, { label: t.title }]}
         />
         <div className="container domain-banner__inner">
@@ -83,7 +82,7 @@ export default async function TrainingPage({ params }: Props) {
           <Heading as="h1">{t.title}</Heading>
           {t.badges?.length ? (
             <p className="cluster">
-              {t.badges.map((b) => <span key={b} className="badge badge--light">{TRAINING_BADGE_LABELS[b as TrainingBadge]}</span>)}
+              {t.badges.map((b) => <span key={b} className="badge badge--banner">{TRAINING_BADGE_LABELS[b as TrainingBadge]}</span>)}
             </p>
           ) : null}
         </div>

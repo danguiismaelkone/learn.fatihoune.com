@@ -67,7 +67,7 @@ export default async function DomainPage({ params }: Props) {
   return (
     <>
       <div className="domain-banner">
-        <Breadcrumbs tone="dark" items={[{ label: 'Formations', href: '/formations' }, { label: domain.title }]} />
+        <Breadcrumbs items={[{ label: 'Formations', href: '/formations' }, { label: domain.title }]} />
         <div className="container domain-banner__inner">
           <Eyebrow>Domaine {String(index).padStart(2, '0')} · {total} formations</Eyebrow>
           <Heading as="h1">{domain.h1}</Heading>

@@ -354,15 +354,12 @@ main:has([data-closing]) ~ .callback{display:none}
 .chip{flex:none;display:inline-block;border:1px solid var(--line-strong);border-radius:var(--radius);padding:6px 12px;font-size:var(--step--1);background:var(--white);white-space:nowrap;text-decoration:none}
 .chip:hover{border-color:var(--ink)}
 /* Domain page: full-width ink banner + collapsible theme groups */
-.domain-banner{background:var(--ink);color:var(--white)}
+.domain-banner{background:var(--white)}
 .domain-banner__inner{display:flex;flex-direction:column;gap:var(--s-3);padding-block:var(--s-4) var(--s-6)}
-.domain-banner .eyebrow{color:var(--white);border-bottom:2px solid var(--accent);padding-bottom:4px;align-self:flex-start}
-.domain-banner .heading--1{color:var(--white);max-width:24ch}
-.domain-banner .text{color:var(--white);opacity:.9}
+.domain-banner .eyebrow{border-bottom:2px solid var(--accent);padding-bottom:4px;align-self:flex-start}
+.domain-banner .heading--1{max-width:24ch}
+.domain-banner .text{color:var(--ink-soft)}
 .domain-banner__band{height:12px}
-.crumbs--dark{color:var(--white)}
-.crumbs--dark a{color:var(--white)}
-.crumbs--dark [aria-current]{opacity:.8}
 .groups{border-top:1px solid var(--ink)}
 .group{border-bottom:1px solid var(--ink)}
 .group__summary{display:flex;align-items:center;justify-content:space-between;gap:var(--s-4);padding:var(--s-3) var(--s-4);background:var(--surface-warm);cursor:pointer;list-style:none}
@@ -376,7 +373,7 @@ main:has([data-closing]) ~ .callback{display:none}
 .group .themes{padding-inline:var(--s-4)}
 .group .themes li:last-child{border-bottom:0}
 .badge{display:inline-block;margin-left:var(--s-2);border:1px solid var(--ink);border-radius:var(--radius);padding:0 6px;font-size:var(--step--1);font-weight:var(--fw-bold);line-height:1.6;vertical-align:1px;white-space:nowrap}
-.badge--light{margin-left:0;border-color:var(--white);color:var(--white)}
+.badge--banner{margin-left:0}
 .themes__title-link{font-weight:var(--fw-bold);text-decoration:underline;text-decoration-color:var(--primary);text-underline-offset:3px}
 .themes__title-link:hover{text-decoration-thickness:2px}
 /* Training page: sticky in-page tabs, ruled sections, practical info list */
