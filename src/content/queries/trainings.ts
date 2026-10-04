@@ -50,6 +50,34 @@ export const getPopularTrainings = cache(async (limit = 6) => {
   return docs.filter((t) => typeof t.domain === 'object' && t.domain.status === 'published')
 })
 
+/** Trainings whose detailed page is published, with their domain — for static params and the sitemap. */
+export const getPublishedTrainingDetails = cache(async () => {
+  const payload = await cms()
+  const { docs } = await payload.find({
+    collection: 'trainings',
+    where: { and: [published, { detailPublished: { equals: true } }] },
+    limit: 500,
+    depth: 1,
+    overrideAccess: false,
+  })
+  return docs.filter((t): t is Training & { domain: TrainingDomain; slug: string } =>
+    Boolean(t.slug) && typeof t.domain === 'object' && t.domain.status === 'published')
+})
+
+export const getTrainingDetail = cache(async (domainSlug: string, slug: string) => {
+  const payload = await cms()
+  const { docs } = await payload.find({
+    collection: 'trainings',
+    where: { and: [published, { detailPublished: { equals: true } }, { slug: { equals: slug } }] },
+    limit: 1,
+    depth: 1,
+    overrideAccess: false,
+  })
+  const t = docs[0]
+  if (!t || typeof t.domain !== 'object' || t.domain.slug !== domainSlug || t.domain.status !== 'published') return null
+  return t as Training & { domain: TrainingDomain }
+})
+
 export const getDomainBySlug = cache(async (slug: string) => {
   const payload = await cms()
   const { docs } = await payload.find({
