@@ -208,6 +208,20 @@ button,input,textarea,select{font:inherit;color:inherit}
 .domain-chips__count::after{content:" ›";color:var(--primary)}
 .domain-chips__band{height:12px;margin-top:var(--section-y)}
 .themes__domain{display:block;font-size:var(--step--1);color:var(--ink-soft);margin-top:2px}
+/* Home: most requested trainings as cards (white on peach, 2 px, no shadow) */
+.course-cards{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,18rem),1fr));gap:var(--s-5)}
+.course-card{display:flex;flex-direction:column;background:var(--white);border:var(--border);border-top:var(--rule);border-radius:var(--radius);overflow:hidden}
+.course-card .media{aspect-ratio:16/9;border:0;border-radius:0}
+.course-card__body{display:flex;flex-direction:column;gap:var(--s-2);padding:var(--s-4);flex:1}
+.course-card__domain{font-size:var(--step--1);font-weight:var(--fw-bold);letter-spacing:var(--tracking-label);text-transform:uppercase;color:var(--primary-strong);text-decoration:none}
+.course-card__domain:hover{text-decoration:underline}
+.course-card__title{margin:0;font-size:var(--step-1);line-height:var(--lh-tight);letter-spacing:var(--tracking-title)}
+.course-card__title a{text-decoration:underline;text-decoration-color:var(--primary);text-underline-offset:3px}
+.course-card__lead{margin:0;color:var(--ink-soft);font-size:var(--step--1);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.course-card__meta{margin:0;display:flex;align-items:center;gap:6px;padding-block:var(--s-2);border-block:var(--border);font-size:var(--step--1);font-variant-numeric:tabular-nums}
+.course-card__icon{width:18px;height:18px;flex:none}
+.course-card__foot{margin-top:auto;padding-top:var(--s-3);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--s-3)}
+.course-card__price{font-size:var(--step--1);font-weight:var(--fw-bold);color:var(--ink-soft)}
 .visit{display:grid;gap:var(--s-4)}
 .visit__card{font-style:normal;display:flex;flex-direction:column;gap:var(--s-2);border-left:4px solid var(--accent);padding-left:var(--s-4)}
 .visit__address{white-space:pre-line;font-weight:var(--fw-bold);font-size:var(--step-1)}

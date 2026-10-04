@@ -12,3 +12,12 @@ export function ChatIcon({ className = 'wa-icon' }: { className?: string }) {
     </svg>
   )
 }
+
+export function ClockIcon({ className = 'icon' }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeWidth="2" />
+      <path d="M12 7v5l3 2" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  )
+}
