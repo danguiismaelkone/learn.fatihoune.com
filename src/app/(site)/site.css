@@ -265,6 +265,26 @@ button.header__search{background:var(--white);cursor:pointer}
 .visit{display:grid;gap:var(--s-4)}
 .visit__card{font-style:normal;display:flex;flex-direction:column;gap:var(--s-2);border-left:4px solid var(--accent);padding-left:var(--s-4)}
 .visit__address{white-space:pre-line;font-weight:var(--fw-bold);font-size:var(--step-1)}
+/* Home « Ce que nous faisons » : cartes avec photo (proposition A, 2026-10-04) */
+.photo-cards{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,16rem),1fr));gap:var(--s-5)}
+.photo-card{display:flex;flex-direction:column;height:100%;background:var(--white);border:var(--border);border-top:var(--rule);border-radius:var(--radius);overflow:hidden;text-decoration:none;color:var(--ink)}
+.photo-card .media{aspect-ratio:16/9;border:0;border-radius:0}
+.photo-card .media img{transition:transform var(--dur) var(--ease)}
+.photo-card:hover .media img{transform:scale(1.03)}
+.photo-card__body{display:flex;flex-direction:column;gap:var(--s-2);padding:var(--s-4) var(--s-4) var(--s-5);flex:1}
+.photo-card__body .heading{margin:0}
+.photo-card__link{margin-top:auto;padding-top:var(--s-2);color:var(--primary-strong);font-weight:var(--fw-bold);text-decoration:underline;text-underline-offset:3px}
+.photo-card:hover .photo-card__link{text-decoration-thickness:2px}
+.photo-card:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+/* Compact red call-to-action band (e.g. FDFP on the home page) */
+.cta-band{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--s-4) var(--s-6);background:var(--primary);color:var(--white);padding:var(--s-5) var(--s-6);border-radius:var(--radius)}
+.cta-band .heading,.cta-band .text{color:var(--white);margin:0}
+.cta-band .text{max-width:60ch}
+.cta-band .btn--primary{background:var(--white);color:var(--primary-strong)}
+.cta-band .btn--primary:hover{background:var(--surface-warm)}
+.cta-band .btn--secondary{background:transparent;color:var(--white);border-color:var(--white)}
+.cta-band .btn--secondary:hover{background:color-mix(in oklch,var(--white) 12%,transparent)}
+.cta-band .btn:focus-visible{outline:2px solid var(--white);outline-offset:2px}
 .doors{display:grid;border-top:1px solid var(--ink)}
 .doors a{display:block;padding:var(--s-5) 0;border-bottom:var(--border);text-decoration:none}
 .doors a:hover .heading{color:var(--primary-strong)}

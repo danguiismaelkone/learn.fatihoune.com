@@ -298,7 +298,27 @@ export async function RenderBlocks({ blocks, ctx }: { blocks: Block[]; ctx: Ctx 
           <Section key={key}>
             <div className="stack stack--lg">
               {block.title ? <Heading>{block.title}</Heading> : null}
-              {block.style === 'doors' ? (
+              {block.style === 'photo' ? (
+                <ul className="photo-cards">
+                  {block.items?.map((c) => {
+                    const img = typeof c.image === 'object' ? (c.image as MediaDoc | null) : null
+                    const photo = mediaFromDoc(img, '(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw')
+                    return (
+                      <li key={c.id}>
+                        <Link className="photo-card" href={c.href}>
+                          {photo ? <Media {...photo} alt="" /> : <Media placeholder="Photo à venir" />}
+                          <span className="photo-card__body">
+                            {c.eyebrow ? <Eyebrow>{c.eyebrow}</Eyebrow> : null}
+                            <Heading as="h3" size={3}>{c.title}</Heading>
+                            {c.text ? <span className="text text--soft">{c.text}</span> : null}
+                            <span className="photo-card__link">{c.linkLabel || 'En savoir plus'} <span aria-hidden="true">›</span></span>
+                          </span>
+                        </Link>
+                      </li>
+                    )
+                  })}
+                </ul>
+              ) : block.style === 'doors' ? (
                 <div className="doors">
                   {block.items?.map((c) => (
                     <Link key={c.id} href={c.href}>
@@ -330,6 +350,20 @@ export async function RenderBlocks({ blocks, ctx }: { blocks: Block[]; ctx: Ctx 
         out.push(<Partners key={key} title={block.title} />)
         break
       case 'demand':
+        if (block.style === 'band') {
+          out.push(
+            <Section key={key} tight>
+              <div className="cta-band">
+                <div className="stack stack--sm">
+                  <strong className="heading heading--3">{block.title}</strong>
+                  {block.text ? <p className="text">{block.text}</p> : null}
+                </div>
+                <Buttons buttons={block.buttons as Cta[]} ctx={ctx} />
+              </div>
+            </Section>,
+          )
+          break
+        }
         out.push(
           <Section key={key} tone="warm">
             <div className="stack">

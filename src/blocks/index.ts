@@ -131,13 +131,17 @@ export const LinkCardsBlock: Block = {
   fields: [
     { name: 'title', label: 'Intertitre (H2, facultatif)', type: 'text' },
     { name: 'style', label: 'Présentation', type: 'select', defaultValue: 'cards', options: [
-      { label: 'Cartes encadrées', value: 'cards' }, { label: 'Trois colonnes à filet (accueil)', value: 'doors' },
+      { label: 'Cartes encadrées', value: 'cards' },
+      { label: 'Trois colonnes à filet', value: 'doors' },
+      { label: 'Cartes avec photo (accueil)', value: 'photo' },
     ] },
     { name: 'items', label: 'Cartes', type: 'array', fields: [
       { name: 'eyebrow', label: 'Surtitre', type: 'text' },
       { name: 'title', label: 'Titre', type: 'text', required: true },
       { name: 'text', label: 'Texte', type: 'text' },
       { name: 'href', label: 'Lien', type: 'text', required: true },
+      { name: 'linkLabel', label: 'Texte du lien (cartes avec photo)', type: 'text', admin: { description: 'Ex. « Voir les formations ». Par défaut : « En savoir plus ».' } },
+      { name: 'image', label: 'Photo (cartes avec photo)', type: 'upload', relationTo: 'media' },
     ] },
   ],
 }
@@ -155,6 +159,10 @@ export const DemandBlock: Block = {
     { name: 'title', label: 'Titre', type: 'text', required: true },
     { name: 'text', label: 'Phrase', type: 'text' },
     { name: 'buttons', label: 'Boutons', type: 'array', maxRows: 2, fields: ctaFields },
+    { name: 'style', label: 'Présentation', type: 'select', defaultValue: 'section', options: [
+      { label: 'Section pêche (pleine largeur)', value: 'section' },
+      { label: 'Bandeau rouge compact', value: 'band' },
+    ] },
   ],
 }
 
