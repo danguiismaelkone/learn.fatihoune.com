@@ -7,6 +7,7 @@ jobs:
       DATABASE_URL: file:/tmp/ci.db
       PAYLOAD_SECRET: ci-only-secret
       NEXT_PUBLIC_SITE_URL: http://localhost:3000
+      MEDIA_DIR: /tmp/media
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -16,4 +17,6 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm lint
       - run: pnpm payload migrate
+      # Same as the Dockerfile: pages are pre-rendered from seeded content (site settings are required).
+      - run: pnpm seed
       - run: pnpm build
