@@ -144,7 +144,7 @@ export interface UserAuthOperations {
 export interface Lead {
   id: number;
   status: 'new' | 'in_progress' | 'done' | 'archived';
-  type: 'quote' | 'info' | 'partnership' | 'callback';
+  type: 'quote' | 'info' | 'partnership' | 'callback' | 'advice';
   callbackSlot?: ('morning' | 'afternoon' | 'anytime') | null;
   name: string;
   company?: string | null;
@@ -153,6 +153,8 @@ export interface Lead {
   email?: string | null;
   topic?: string | null;
   participants?: number | null;
+  trainingLocation?: ('client' | 'fatihoune' | 'undecided') | null;
+  fdfpFunding?: boolean | null;
   message: string;
   internalNote?: string | null;
   tracking?: {
@@ -710,6 +712,8 @@ export interface LeadsSelect<T extends boolean = true> {
   email?: T;
   topic?: T;
   participants?: T;
+  trainingLocation?: T;
+  fdfpFunding?: T;
   message?: T;
   internalNote?: T;
   tracking?:

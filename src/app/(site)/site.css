@@ -317,6 +317,11 @@ a.card:hover{border-color:var(--ink)}
 .radios{display:grid;gap:var(--s-2);border:0;padding:0;margin:0}
 .radio{display:flex;gap:10px;align-items:center;border:1px solid var(--line-strong);border-radius:var(--radius);padding:12px;background:var(--white);cursor:pointer}
 .radio:has(input:checked){border:2px solid var(--ink);background:var(--surface-warm);padding:11px}
+.radios--cards{grid-template-columns:repeat(auto-fit,minmax(min(100%,15rem),1fr))}
+.radios--cards legend{grid-column:1/-1}
+.radios--cards .radio{align-items:flex-start;height:100%}
+.radios--cards input{margin-top:4px;flex:none}
+.radio__text{display:flex;flex-direction:column;gap:2px}
 .consent{display:flex;gap:10px;align-items:flex-start}
 .consent input{margin-top:5px;width:18px;height:18px}
 .alert{border:var(--border);border-left:4px solid var(--danger);background:var(--white);padding:var(--s-4)}
