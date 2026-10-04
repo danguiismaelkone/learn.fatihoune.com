@@ -2,7 +2,18 @@
 
 import { headers } from 'next/headers'
 import { cms } from '@/lib/cms'
-import { readLead, validateLead, type LeadErrors, type LeadInput } from '@/lib/lead'
+import {
+  CALLBACK_SLOT_LABELS,
+  readCallback,
+  readLead,
+  validateCallback,
+  validateLead,
+  type CallbackErrors,
+  type CallbackInput,
+  type CallbackSlot,
+  type LeadErrors,
+  type LeadInput,
+} from '@/lib/lead'
 
 export type SubmitState =
   | { status: 'idle' }
@@ -23,47 +34,44 @@ function rateLimited(ip: string) {
   return recent.length > MAX_PER_WINDOW
 }
 
-const TYPE_LABEL = { quote: 'Devis entreprise', info: 'Information', partnership: 'Partenariat' } as const
+const TYPE_LABEL = { quote: 'Devis entreprise', info: 'Information', partnership: 'Partenariat', callback: 'Demande de rappel' } as const
 
-export async function submitLead(_prev: SubmitState, form: FormData): Promise<SubmitState> {
-  const values = readLead(form)
-  // Honeypot: a filled hidden field means a bot. Pretend success, store nothing.
-  if (String(form.get('website') ?? '').trim()) return { status: 'success' }
+type LeadData = {
+  type: keyof typeof TYPE_LABEL
+  name: string
+  company?: string
+  jobTitle?: string
+  phone?: string
+  email?: string
+  topic?: string
+  participants?: number
+  callbackSlot?: CallbackSlot
+  message: string
+  sourcePage: string
+  consent: boolean
+}
 
+async function clientIp() {
   const h = await headers()
-  const ip = (h.get('x-forwarded-for') ?? '').split(',')[0].trim() || h.get('x-real-ip') || 'unknown'
-  if (rateLimited(ip)) {
-    return { status: 'error', message: 'Vous avez envoyé plusieurs demandes en peu de temps. Patientez quelques minutes, ou écrivez-nous sur WhatsApp.', values }
-  }
+  return (h.get('x-forwarded-for') ?? '').split(',')[0].trim() || h.get('x-real-ip') || 'unknown'
+}
 
-  const errors = validateLead(values)
-  if (Object.keys(errors).length) return { status: 'invalid', errors, values }
-
+/** Stores the lead, then notifies the team. Returns false only when storage failed. */
+async function storeLead(data: LeadData): Promise<boolean> {
   const payload = await cms()
+  const { sourcePage, consent, ...fields } = data
   let leadId: string | number
   try {
     const lead = await payload.create({
       collection: 'leads',
       overrideAccess: true,
-      data: {
-        status: 'new',
-        type: values.type,
-        name: values.name.trim(),
-        company: values.company.trim() || undefined,
-        jobTitle: values.jobTitle.trim() || undefined,
-        phone: values.phone.trim() || undefined,
-        email: values.email.trim() || undefined,
-        topic: values.topic.trim() || undefined,
-        participants: values.participants.trim() ? Number(values.participants) : undefined,
-        message: values.message.trim(),
-        tracking: { sourcePage: values.sourcePage || 'contact', consent: values.consent },
-      },
+      data: { status: 'new', ...fields, tracking: { sourcePage, consent } },
     })
     leadId = lead.id
-    payload.logger.info({ msg: 'Lead stored', leadId, type: values.type, sourcePage: values.sourcePage })
+    payload.logger.info({ msg: 'Lead stored', leadId, type: data.type, sourcePage })
   } catch (error) {
     payload.logger.error({ err: error, msg: 'Lead storage failed' })
-    return { status: 'error', message: 'Votre demande n’a pas pu être envoyée. Réessayez, ou écrivez-nous directement sur WhatsApp.', values }
+    return false
   }
 
   // Notify the team. The lead is already saved: an e-mail failure is logged on the lead, never shown as a failure to the visitor.
@@ -75,20 +83,21 @@ export async function submitLead(_prev: SubmitState, form: FormData): Promise<Su
     try {
       await payload.sendEmail({
         to: recipients,
-        replyTo: values.email || undefined,
-        subject: `Nouvelle demande (${TYPE_LABEL[values.type]}) — ${values.name}${values.company ? `, ${values.company}` : ''}`,
+        replyTo: data.email || undefined,
+        subject: `Nouvelle demande (${TYPE_LABEL[data.type]}) — ${data.name}${data.company ? `, ${data.company}` : ''}`,
         text: [
-          `Type : ${TYPE_LABEL[values.type]}`,
-          `Nom : ${values.name}`,
-          values.company ? `Organisme : ${values.company}` : null,
-          values.jobTitle ? `Fonction : ${values.jobTitle}` : null,
-          values.phone ? `Téléphone : ${values.phone}` : null,
-          values.email ? `E-mail : ${values.email}` : null,
-          values.topic ? `Sujet : ${values.topic}` : null,
-          values.participants ? `Participants : ${values.participants}` : null,
-          `Page d’origine : ${values.sourcePage || 'contact'}`,
+          `Type : ${TYPE_LABEL[data.type]}`,
+          `Nom : ${data.name}`,
+          data.company ? `Organisme : ${data.company}` : null,
+          data.jobTitle ? `Fonction : ${data.jobTitle}` : null,
+          data.phone ? `Téléphone : ${data.phone}` : null,
+          data.email ? `E-mail : ${data.email}` : null,
+          data.callbackSlot ? `Rappel souhaité : ${CALLBACK_SLOT_LABELS[data.callbackSlot]}` : null,
+          data.topic ? `Sujet : ${data.topic}` : null,
+          data.participants ? `Participants : ${data.participants}` : null,
+          `Page d’origine : ${sourcePage}`,
           '',
-          values.message,
+          data.message,
           '',
           `Voir dans l’administration : ${process.env.NEXT_PUBLIC_SITE_URL ?? ''}/admin/collections/leads/${leadId}`,
         ].filter((l) => l !== null).join('\n'),
@@ -105,7 +114,64 @@ export async function submitLead(_prev: SubmitState, form: FormData): Promise<Su
     id: leadId,
     overrideAccess: true,
     context: { skipAudit: true },
-    data: { tracking: { sourcePage: values.sourcePage || 'contact', consent: values.consent, notification, notificationError } },
+    data: { tracking: { sourcePage, consent, notification, notificationError } },
   })
-  return { status: 'success' }
+  return true
+}
+
+const RATE_LIMIT_MESSAGE = 'Vous avez envoyé plusieurs demandes en peu de temps. Patientez quelques minutes, ou écrivez-nous sur WhatsApp.'
+const STORAGE_ERROR = 'Votre demande n’a pas pu être envoyée. Réessayez, ou écrivez-nous directement sur WhatsApp.'
+
+export async function submitLead(_prev: SubmitState, form: FormData): Promise<SubmitState> {
+  const values = readLead(form)
+  // Honeypot: a filled hidden field means a bot. Pretend success, store nothing.
+  if (String(form.get('website') ?? '').trim()) return { status: 'success' }
+  if (rateLimited(await clientIp())) return { status: 'error', message: RATE_LIMIT_MESSAGE, values }
+
+  const errors = validateLead(values)
+  if (Object.keys(errors).length) return { status: 'invalid', errors, values }
+
+  const stored = await storeLead({
+    type: values.type,
+    name: values.name.trim(),
+    company: values.company.trim() || undefined,
+    jobTitle: values.jobTitle.trim() || undefined,
+    phone: values.phone.trim() || undefined,
+    email: values.email.trim() || undefined,
+    topic: values.topic.trim() || undefined,
+    participants: values.participants.trim() ? Number(values.participants) : undefined,
+    message: values.message.trim(),
+    sourcePage: values.sourcePage || 'contact',
+    consent: values.consent,
+  })
+  return stored ? { status: 'success' } : { status: 'error', message: STORAGE_ERROR, values }
+}
+
+export type CallbackState =
+  | { status: 'idle' }
+  | { status: 'invalid'; errors: CallbackErrors; values: CallbackInput }
+  | { status: 'error'; message: string; values: CallbackInput }
+  | { status: 'success' }
+
+export async function submitCallback(_prev: CallbackState, form: FormData): Promise<CallbackState> {
+  const values = readCallback(form)
+  if (String(form.get('website') ?? '').trim()) return { status: 'success' }
+  if (rateLimited(await clientIp())) return { status: 'error', message: RATE_LIMIT_MESSAGE, values }
+
+  const errors = validateCallback(values)
+  if (Object.keys(errors).length) return { status: 'invalid', errors, values }
+
+  const topic = values.topic.trim() || undefined
+  const stored = await storeLead({
+    type: 'callback',
+    name: values.name.trim(),
+    phone: values.phone.trim(),
+    callbackSlot: values.slot,
+    topic,
+    // The collection requires a message: a callback request carries a generated one.
+    message: `Demande de rappel. Moment souhaité : ${CALLBACK_SLOT_LABELS[values.slot].toLowerCase()}.${topic ? ` Sujet : ${topic}.` : ''}`,
+    sourcePage: values.sourcePage || 'inconnue',
+    consent: values.consent,
+  })
+  return stored ? { status: 'success' } : { status: 'error', message: STORAGE_ERROR, values }
 }

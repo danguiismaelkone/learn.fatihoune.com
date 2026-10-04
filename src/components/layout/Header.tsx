@@ -1,15 +1,32 @@
 import Image from 'next/image'
 import Link from 'next/link'
+import { whatsappHref } from '@/components/ui/cta'
+import { ChatIcon } from '@/components/ui/icons'
+import { ReadingProgress } from '@/components/ui/ScrollAids'
+import { SearchForm } from '@/components/ui/SearchForm'
 import { mainNav } from '@/config/site'
+import { getSiteSettings } from '@/content/queries/settings'
 import { getDomains } from '@/content/queries/trainings'
 import { MobileMenu } from './MobileMenu'
 
 const pad = (n: number) => String(n).padStart(2, '0')
 
 export async function Header() {
-  const domains = await getDomains()
+  const [domains, settings] = await Promise.all([getDomains(), getSiteSettings()])
   return (
     <header className="header">
+      {/* Utility row (desktop only): search, phone, WhatsApp. On mobile the search icon and the menu cover these. */}
+      <div className="header__util">
+        <div className="container header__util-inner">
+          <SearchForm variant="util" id="util-q" />
+          <a className="header__util-link" href={`tel:${settings.phone.replace(/\s/g, '')}`}>
+            Tél. {settings.phone}
+          </a>
+          <a className="header__util-link" href={whatsappHref(settings.whatsapp)} target="_blank" rel="noopener noreferrer">
+            <ChatIcon className="header__util-icon" /> WhatsApp {settings.whatsappDisplay}
+          </a>
+        </div>
+      </div>
       <div className="container header__bar">
         <Link className="brand" href="/" aria-label="FATIHOUNE — accueil">
           <Image src="/brand/fatihoune-symbol.png" alt="" width={66} height={26} priority />
@@ -65,6 +82,7 @@ export async function Header() {
         </Link>
         <MobileMenu />
       </div>
+      <ReadingProgress />
     </header>
   )
 }
