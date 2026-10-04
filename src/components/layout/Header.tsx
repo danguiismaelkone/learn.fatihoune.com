@@ -1,24 +1,52 @@
 import Image from 'next/image'
 import Link from 'next/link'
+import { Media, mediaFromDoc } from '@/components/primitives'
 import { whatsappHref } from '@/components/ui/cta'
 import { ChatIcon } from '@/components/ui/icons'
 import { ReadingProgress } from '@/components/ui/ScrollAids'
-import { SearchForm } from '@/components/ui/SearchForm'
-import { mainNav } from '@/config/site'
+import { SearchDialog, SearchTrigger } from '@/components/ui/SearchDialog'
+import { audienceNav, mainNav, solutionsNav, visibleLinks, type NavLink } from '@/config/site'
+import { getAllPagePaths } from '@/content/queries/pages'
 import { getSiteSettings } from '@/content/queries/settings'
 import { getDomains } from '@/content/queries/trainings'
+import type { Media as MediaDoc } from '@/payload-types'
 import { MobileMenu } from './MobileMenu'
+import { NavDropdown } from './NavDropdown'
 
 const pad = (n: number) => String(n).padStart(2, '0')
 
+function LinkList({ links }: { links: NavLink[] }) {
+  return (
+    <ul className="mega__links">
+      {links.map((l) => (
+        <li key={l.href}>
+          <Link href={l.href}>
+            <strong>{l.label}</strong>
+            {l.hint ? <span>{l.hint}</span> : null}
+          </Link>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
 export async function Header() {
-  const [domains, settings] = await Promise.all([getDomains(), getSiteSettings()])
+  const [domains, settings, pages] = await Promise.all([getDomains(), getSiteSettings(), getAllPagePaths()])
+  const published = new Set(pages.map((p) => p.path))
+  const solutions = visibleLinks(solutionsNav, published)
+  const audiences = visibleLinks(audienceNav, published)
+  const featured = settings.featuredSolution?.title && settings.featuredSolution?.href ? settings.featuredSolution : null
+  const featuredPhoto = featured
+    ? mediaFromDoc(typeof featured.image === 'object' ? (featured.image as MediaDoc | null) : null, '320px')
+    : null
+  const popular = (settings.popularSearches ?? []).map((p) => p.term).filter(Boolean)
+
   return (
     <header className="header">
-      {/* Utility row (desktop only): search, phone, WhatsApp. On mobile the search icon and the menu cover these. */}
+      {/* Utility row (desktop only): search button, phone, WhatsApp. On mobile the search icon and the menu cover these. */}
       <div className="header__util">
         <div className="container header__util-inner">
-          <SearchForm variant="util" id="util-q" />
+          <SearchTrigger variant="util" />
           <a className="header__util-link" href={`tel:${settings.phone.replace(/\s/g, '')}`}>
             Tél. {settings.phone}
           </a>
@@ -33,39 +61,69 @@ export async function Header() {
           FATIHOUNE
         </Link>
         <nav className="nav" aria-label="Menu principal">
-          <details className="nav__formations">
-            <summary>Formations ▾</summary>
-            <div className="mega">
-              <div className="container mega__inner">
-                <div>
-                  <span className="eyebrow">{domains.length} domaines de formation</span>
-                  <ol>
-                    {domains.map((d, i) => (
-                      <li key={d.id}>
-                        <Link href={`/formations/${d.slug}`}>
-                          <em className="num">{pad(i + 1)}</em>
-                          {d.title}
-                        </Link>
-                      </li>
-                    ))}
-                  </ol>
-                  <p style={{ marginTop: 'var(--s-3)' }}>
-                    <Link className="link" href="/formations">
-                      Toutes les formations
-                    </Link>
-                  </p>
-                </div>
-                <div className="callout stack stack--sm">
-                  <strong>Certificats de spécialisation</strong>
-                  <span className="text--soft">Cinq cycles longs de 100 à 120 heures.</span>
-                  <Link className="link" href="/certificats">
-                    Voir les certificats
-                  </Link>
-                </div>
+          <NavDropdown id="formations" label="Formations">
+            <div className="container mega__inner">
+              <div>
+                <span className="eyebrow">{domains.length} domaines de formation</span>
+                <ol className="mega__domains">
+                  {domains.map((d, i) => (
+                    <li key={d.id}>
+                      <Link href={`/formations/${d.slug}`}>
+                        <em className="num">{pad(i + 1)}</em>
+                        {d.title}
+                      </Link>
+                    </li>
+                  ))}
+                </ol>
+                <p style={{ marginTop: 'var(--s-3)' }}>
+                  <Link className="link" href="/formations">Toutes les formations</Link>
+                </p>
+              </div>
+              <div className="callout stack stack--sm">
+                <strong>Certificats de spécialisation</strong>
+                <span className="text--soft">Cinq cycles longs de 100 à 120 heures.</span>
+                <Link className="link" href="/certificats">Voir les certificats</Link>
               </div>
             </div>
-          </details>
-          {mainNav.slice(1).map((item) => (
+          </NavDropdown>
+
+          <NavDropdown id="solutions" label="Solutions">
+            <div className="container mega__inner">
+              <div>
+                <span className="eyebrow">Nos solutions</span>
+                <LinkList links={solutions} />
+                {published.has('solutions') ? (
+                  <p style={{ marginTop: 'var(--s-3)' }}>
+                    <Link className="link" href="/solutions">Toutes nos solutions</Link>
+                  </p>
+                ) : null}
+              </div>
+              {featured ? (
+                <Link className="mega__feature" href={featured.href!}>
+                  {featuredPhoto ? <Media {...featuredPhoto} alt="" /> : null}
+                  <span className="mega__feature-body">
+                    {featured.eyebrow ? <span className="eyebrow">{featured.eyebrow}</span> : null}
+                    <strong className="heading heading--3">{featured.title}</strong>
+                    {featured.text ? <span className="text--soft">{featured.text}</span> : null}
+                    <span className="link">Découvrir</span>
+                  </span>
+                </Link>
+              ) : null}
+            </div>
+          </NavDropdown>
+
+          {audiences.length ? (
+            <NavDropdown id="vous-etes" label="Vous êtes">
+              <div className="container mega__inner mega__inner--single">
+                <div>
+                  <span className="eyebrow">Des réponses adaptées à votre situation</span>
+                  <LinkList links={audiences} />
+                </div>
+              </div>
+            </NavDropdown>
+          ) : null}
+
+          {mainNav.map((item) => (
             <Link key={item.href} href={item.href}>
               {item.label}
             </Link>
@@ -74,15 +132,15 @@ export async function Header() {
             Demander un devis
           </Link>
         </nav>
-        <Link className="header__search" href="/recherche" aria-label="Rechercher une formation">
-          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-            <circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" strokeWidth="2" />
-            <path d="m15.5 15.5 5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-          </svg>
-        </Link>
-        <MobileMenu />
+        <SearchTrigger variant="icon" />
+        <MobileMenu
+          domains={domains.map((d) => ({ href: `/formations/${d.slug}`, label: d.title }))}
+          solutions={solutions}
+          audiences={audiences}
+        />
       </div>
       <ReadingProgress />
+      <SearchDialog popular={popular} />
     </header>
   )
 }

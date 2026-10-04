@@ -389,7 +389,7 @@ export interface Page {
    * Ex. digitalisation, programmes/entrepreneuriat. Ne pas modifier après publication.
    */
   path: string;
-  parentLabel?: 'programmes' | null;
+  parentLabel?: ('programmes' | 'solutions' | 'vous-etes') | null;
   layout: (
     | {
         eyebrow?: string | null;
@@ -1183,6 +1183,25 @@ export interface SiteSetting {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Pastilles proposées à l’ouverture de la recherche. 3 à 6 termes courts.
+   */
+  popularSearches?:
+    | {
+        term: string;
+        id?: string | null;
+      }[]
+    | null;
+  featuredSolution?: {
+    eyebrow?: string | null;
+    title?: string | null;
+    text?: string | null;
+    /**
+     * Ex. /digitalisation
+     */
+    href?: string | null;
+    image?: (number | null) | Media;
+  };
   catalogPdf?: (number | null) | Media;
   presentationPdf?: (number | null) | Media;
   /**
@@ -1227,6 +1246,21 @@ export interface SiteSettingsSelect<T extends boolean = true> {
         label?: T;
         source?: T;
         id?: T;
+      };
+  popularSearches?:
+    | T
+    | {
+        term?: T;
+        id?: T;
+      };
+  featuredSolution?:
+    | T
+    | {
+        eyebrow?: T;
+        title?: T;
+        text?: T;
+        href?: T;
+        image?: T;
       };
   catalogPdf?: T;
   presentationPdf?: T;

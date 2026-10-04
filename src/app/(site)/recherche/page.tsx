@@ -55,7 +55,7 @@ export default async function SearchPage({ searchParams }: Props) {
             <ul className="themes">
               {g.items.map((t) => (
                 <li key={t.id}>
-                  <span>{t.title}</span>
+                  <span>{t.hasPage ? <Link className="themes__title-link" href={t.href}>{t.title}</Link> : t.title}</span>
                   <span className="themes__duration">{t.duration ?? ''}</span>
                   <Link className="link themes__ask" href={contactHref('quote', `${g.domainTitle} › ${t.title}`, 'recherche')}>
                     Demander cette formation<span className="sr-only"> : {t.title}</span>

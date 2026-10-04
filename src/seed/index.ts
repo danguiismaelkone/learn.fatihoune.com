@@ -6,6 +6,7 @@ import { getPayload } from 'payload'
 import config from '@payload-config'
 import domains from './domains.json' with { type: 'json' }
 import { pages } from './pages'
+import { applyNavigation } from './navigation'
 import { rich } from './lexical'
 import images from './images.json' with { type: 'json' }
 import path from 'path'
@@ -193,6 +194,9 @@ for (const p of pages) {
   await upsert('pages', { path: { equals: p.path } }, { ...p, layout, status: 'published' })
 }
 log(`${pages.length} pages`)
+
+// --- Menus « Solutions » / « Vous êtes », search, Digitalisation highlight (fresh installs: published) ---
+for (const line of await applyNavigation(payload, { publish: true })) log(line)
 
 log('done')
 process.exit(0)

@@ -68,7 +68,7 @@ export default async function FormationsPage() {
           </ul>
         </div>
       </Section>
-      <Section>
+      <Section id="sur-mesure">
         <div className="stack stack--lg">
           <div className="stack stack--sm">
             <Heading>Formation sur mesure : nous partons de vos besoins</Heading>

@@ -11,6 +11,9 @@ type Entry = {
   group?: string | null
   domainTitle: string
   domainSlug: string
+  /** Detailed page when published, otherwise the domain page. */
+  href: string
+  hasPage: boolean
   haystack: string
   normTitle: string
 }
@@ -24,7 +27,7 @@ const getSearchIndex = cache(async (): Promise<Entry[]> => {
     limit: 2000,
     depth: 1,
     overrideAccess: false,
-    select: { title: true, durationLabel: true, group: true, domain: true },
+    select: { title: true, durationLabel: true, group: true, domain: true, slug: true, detailPublished: true },
   })
   return docs
     .filter((t) => typeof t.domain === 'object' && t.domain?.status === 'published')
@@ -37,6 +40,8 @@ const getSearchIndex = cache(async (): Promise<Entry[]> => {
         group: t.group,
         domainTitle: d.title,
         domainSlug: d.slug,
+        href: t.detailPublished && t.slug ? `/formations/${d.slug}/${t.slug}` : `/formations/${d.slug}`,
+        hasPage: Boolean(t.detailPublished && t.slug),
         normTitle: normalize(t.title),
         haystack: normalize(`${t.title} ${t.group ?? ''}`),
       }
