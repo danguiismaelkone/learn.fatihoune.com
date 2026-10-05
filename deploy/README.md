@@ -1,98 +1,106 @@
 # Déploiement — FATIHOUNE Formation
 
-Serveur Linux avec Docker, **Nginx Proxy Manager** (NPM) pour les domaines et le HTTPS, Portainer pour surveiller
-les conteneurs. Le site tourne dans un conteneur `app` (Next.js + Payload + SQLite) avec un conteneur `backup`
-(sauvegarde quotidienne). Il écoute sur un port du serveur que NPM relaie.
+Convention de l'équipe : **Makefile** + `docker-compose.yml` (application + nginx interne) + `.env.production`,
+derrière **Nginx Proxy Manager** (NPM) qui gère les domaines et le HTTPS. Portainer sert à surveiller les conteneurs.
+
+| Conteneur | Rôle |
+|---|---|
+| `app` | le site (Next.js + Payload), image construite depuis le `Dockerfile` |
+| `nginx_proxy` | nginx interne (`nginx/nginx.conf`), publie le port donné à NPM |
+| `backup` | sauvegarde quotidienne de la base et des médias dans `backups/` (14 jours) |
+
+Pas de conteneur de base de données : le site utilise **SQLite**, un fichier rangé avec les médias dans le volume
+Docker `data`.
 
 ## Prérequis
-- Docker + Docker Compose v2 ; 2 Go de RAM libres pendant la construction de l'image (quelques minutes).
-- Un **port libre** sur le serveur, par exemple 3010 : `ss -ltn | grep :3010` ne doit rien afficher.
-- DNS : enregistrement **A** du domaine vers l'IP du serveur (nécessaire pour le certificat Let's Encrypt de NPM).
+- Docker + Docker Compose v2 (`docker compose` ou `docker-compose` v2), `make`, `openssl`.
+- 2 Go de RAM libres pendant la construction de l'image (quelques minutes).
+- Un **port libre**, par exemple 3018 : `ss -ltn | grep :3018` ne doit rien afficher.
+- DNS : enregistrement **A** du domaine vers l'IP du serveur (pour le certificat Let's Encrypt de NPM).
 
 ## 1. Premier déploiement
 
 ```bash
 git clone https://github.com/danguiismaelkone/learn.fatihoune.com.git fatihoune-formation
 cd fatihoune-formation
-cp deploy/env.preprod.example .env.preprod        # ou env.production.example → .env.production
-nano .env.preprod
+make env                 # crée .env.production avec un PAYLOAD_SECRET généré
+nano .env.production     # remplir les valeurs ci-dessous
+make deploy              # alias : make run-dev
 ```
-
-À remplir dans le fichier `.env` :
 
 | Variable | Valeur |
 |---|---|
-| `APP_PORT` | le port libre choisi (ex. `3010`) |
-| `APP_BIND` | laisser `172.17.0.1` (voir « Réseau » plus bas) |
-| `PAYLOAD_SECRET` | `openssl rand -hex 32` ; **ne plus jamais le changer** (sessions et données chiffrées en dépendent) |
-| `PREVIEW_PASSWORD` | préproduction seulement : mot de passe d'accès au site |
-| `SMTP_*` | OVH : `SMTP_HOST=ssl0.ovh.net`, `SMTP_PORT=587`, `SMTP_USER`/`SMTP_FROM=infos@fatihoune.com`, `SMTP_PASS` |
+| `APP_PORT` | le port libre choisi (ex. `3018`) |
+| `APP_BIND` | laisser `172.17.0.1` (voir « Réseau ») |
+| `PAYLOAD_SECRET` | déjà généré par `make env` ; **ne plus jamais le changer** |
+| `SMTP_HOST` / `SMTP_PASS` | OVH : `ssl0.ovh.net` et le mot de passe de la boîte `infos@fatihoune.com` |
 | `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD` | compte administrateur créé au premier démarrage ; à vider ensuite |
 
 Ne mettez jamais de commentaire sur la même ligne qu'une valeur (`SMTP_HOST=  # ...`) : Docker Compose lirait le
 commentaire comme valeur.
 
-Puis :
+`make deploy` construit l'image, recrée les conteneurs, attend que le site réponde sur `/healthz` et affiche la cible à
+saisir dans NPM. Au premier démarrage : création de la base (migrations) et import des contenus de départ.
 
-```bash
-./deploy/deploy.sh preprod
-```
-
-Le script construit l'image, démarre les conteneurs, attend que le site réponde sur `/healthz` et affiche la cible à
-saisir dans NPM. Au premier démarrage, la base est créée (migrations) et les contenus de départ sont importés.
+Préproduction : mêmes commandes avec `ENV=preprod` (`make env ENV=preprod`, `make deploy ENV=preprod`), fichier
+`.env.preprod`, autre `APP_PORT`. Elle est protégée par mot de passe (`PREVIEW_PASSWORD`) et jamais indexée.
+Préproduction et production peuvent tourner sur le même serveur (projets Docker et volumes distincts).
 
 ## 2. Nginx Proxy Manager
 
 *Proxy Hosts › Add Proxy Host* :
-- **Domain Names** : `preprod.formation.fatihoune.com` (ou `formation.fatihoune.com` en production) ;
+- **Domain Names** : `formation.fatihoune.com` (ou le sous-domaine de préproduction) ;
 - **Scheme** `http`, **Forward Hostname / IP** `172.17.0.1`, **Forward Port** = `APP_PORT` ;
 - *Block Common Exploits* activé ;
-- onglet **SSL** : *Request a new SSL Certificate* (Let's Encrypt), **Force SSL**, **HTTP/2**, **HSTS**.
+- onglet **SSL** : nouveau certificat Let's Encrypt, **Force SSL**, **HTTP/2**, **HSTS**.
 
-Vérification : `https://<domaine>/healthz` répond `{"status":"ok"}`, puis connexion sur `https://<domaine>/admin`,
-création des comptes de l'équipe et suppression de `SEED_ADMIN_*` dans le `.env`.
+Vérifier `https://<domaine>/healthz` → `{"status":"ok"}`, se connecter sur `/admin`, créer les comptes de l'équipe,
+puis vider `SEED_ADMIN_*` dans le `.env`.
 
-**Bascule de l'ancien site (production, au GO de lancement uniquement)** : ajouter un second Proxy Host
-`fatihoune.com` + `www.fatihoune.com` vers la même cible. Le site applique lui-même les redirections de l'ancien site ;
-NPM transmet le nom de domaine d'origine (en-tête `Host`) par défaut, ce dont ces redirections ont besoin.
+**Bascule de l'ancien site (au GO de lancement uniquement)** : second Proxy Host `fatihoune.com` +
+`www.fatihoune.com` vers la même cible. Le site applique lui-même les redirections de l'ancien site d'après le nom de
+domaine, que NPM et le nginx interne transmettent (en-tête `Host`).
 
 ### Réseau
-Le port est publié sur `172.17.0.1`, l'adresse du serveur sur le réseau Docker : NPM (dans Docker) l'atteint, Internet
-non. Ne pas publier sur `0.0.0.0` : Docker contourne le pare-feu (ufw), le site serait accessible en HTTP sans NPM.
-Si NPM ne joint pas cette adresse (réseau Docker personnalisé), vérifier l'adresse de l'hôte avec
-`ip -4 addr show docker0` et la reporter dans `APP_BIND` et dans NPM.
+Le port est publié sur `172.17.0.1`, l'adresse du serveur sur le réseau Docker : NPM l'atteint, Internet non.
+Un `"3018:80"` classique publierait sur toutes les interfaces ; comme Docker contourne le pare-feu (ufw), le site serait
+alors accessible en HTTP sur `http://<ip-du-serveur>:3018`, sans NPM ni HTTPS. Si NPM ne joint pas `172.17.0.1`
+(réseau Docker personnalisé), lire l'adresse avec `ip -4 addr show docker0` et la reporter dans `APP_BIND` et NPM.
 
 ## 3. Reprendre les contenus saisis en local
 
 Au premier démarrage, le serveur importe les contenus de départ, **pas** ce qui a été saisi ou téléversé dans
 l'administration locale. Pour reprendre ce travail :
 
-**Sur le poste local** (dans `website/site`, serveur de dev lancé au moins une fois avec le dernier code) :
-```bash
-./deploy/export-content.sh
-```
-Le script copie la base sans arrêter le serveur de dev, vérifie que son schéma correspond exactement aux migrations
-du dépôt, les marque comme appliquées dans la copie (une base de développement n'en garde pas trace) et produit
-`content-export/fatihoune-content-<date>.tar.gz` (base + médias).
-
-**Envoyer l'archive** sur le serveur (FTP ou `scp`) dans `fatihoune-formation/content-import/`, puis **sur le serveur** :
-```bash
-./deploy/import-content.sh preprod content-import/fatihoune-content-<date>.tar.gz
-```
-Le script demande de taper `IMPORT`, sauvegarde les données en place dans `backups/pre-import-<date>.tar.gz`, remplace
-la base et les médias, puis redémarre le site. Les comptes administrateur sont ceux de la base importée.
+1. **Poste local** (dossier `website/site`, serveur de dev lancé au moins une fois avec le dernier code) :
+   `make export-content` → `content-export/fatihoune-content-<date>.tar.gz`. Le script vérifie que la base locale
+   correspond exactement aux migrations du dépôt et les marque comme appliquées dans la copie.
+2. **Envoyer l'archive** (FTP ou `scp`) dans `content-import/` du dossier cloné sur le serveur.
+3. **Serveur** : `make import-content ARCHIVE=content-import/fatihoune-content-<date>.tar.gz`
+   Taper `IMPORT` pour confirmer. Les données en place sont d'abord sauvegardées dans `backups/pre-import-<date>.tar.gz`.
 
 ## 4. Mettre à jour le site
 
 ```bash
-git pull && ./deploy/deploy.sh preprod      # ou production
+git pull && make deploy
 ```
 Rien à changer dans NPM. Les migrations s'appliquent au démarrage ; le contenu saisi dans l'administration n'est
-jamais écrasé (l'import des contenus de départ ne s'exécute que sur une base vide).
+jamais écrasé.
 
-## 5. Sauvegardes et restauration
-- Le conteneur `backup` écrit chaque jour `backups/fatihoune-AAAA-MM-JJ.db` et `backups/media-AAAA-MM-JJ.tar.gz`
-  (14 jours). **Copiez-les régulièrement hors du serveur.**
+## 5. Commandes utiles
+
+```bash
+make help          # liste des commandes
+make ps            # état des conteneurs
+make logs          # journaux du site (chaque demande reçue : « Lead stored »)
+make restart       # redémarrer sans reconstruire
+make stop          # arrêter (les données sont conservées)
+make backup-now    # sauvegarde immédiate dans backups/
+```
+
+## 6. Sauvegardes et restauration
+- `backups/fatihoune-AAAA-MM-JJ.db` et `backups/media-AAAA-MM-JJ.tar.gz` chaque jour (14 jours).
+  **Les copier régulièrement hors du serveur.**
 - Restaurer une sauvegarde quotidienne :
 ```bash
 docker compose --env-file .env.production stop app
@@ -100,18 +108,8 @@ docker compose --env-file .env.production run --rm --no-deps -v "$PWD/backups:/b
   -c "cp /backups/fatihoune-AAAA-MM-JJ.db /data/fatihoune.db && rm -rf /data/media && tar -xzf /backups/media-AAAA-MM-JJ.tar.gz -C /data"
 docker compose --env-file .env.production start app
 ```
-- Revenir à l'état d'avant un import : `./deploy/import-content.sh production backups/pre-import-<date>.tar.gz`.
+- Annuler un import : `make import-content ARCHIVE=backups/pre-import-<date>.tar.gz`.
 
-## 6. Surveiller
+## Surveiller
 - `https://<domaine>/healthz` → `{"status":"ok"}` (à brancher sur un service de surveillance).
-- Portainer : conteneurs `fatihoune-production-app-1` / `-backup-1` (ou `fatihoune-preview-…`), état *healthy*.
-- Journaux : `docker compose --env-file .env.production logs -f app` (chaque demande reçue : `Lead stored`).
-
-## Préproduction et production sur le même serveur
-Elles cohabitent : chacune a son nom de projet Docker (`fatihoune-preview`, `fatihoune-production`), son volume de
-données et son `APP_PORT` (ex. 3010 et 3011). `SITE_ENV=production` rend le site indexable : ne l'utiliser que pour
-`formation.fatihoune.com`.
-
-## Serveur sans reverse proxy
-Ajouter `COMPOSE_PROFILES=caddy` au `.env` : le conteneur Caddy fourni prend les ports 80/443 et obtient le certificat
-lui-même (`deploy/Caddyfile.*`). Inutile avec Nginx Proxy Manager.
+- Portainer : `fatihoune-production-app-1` doit être *healthy* ; `-nginx_proxy-1` et `-backup-1` *running*.

@@ -1,6 +1,6 @@
 #!/bin/sh
 # Run on the server, from website/site.
-# Usage: ./deploy/import-content.sh preprod|production content-import/fatihoune-content-<date>.tar.gz
+# Usage: make import-content ENV=preprod|production ARCHIVE=content-import/fatihoune-content-<date>.tar.gz
 # REPLACES the site's database and uploaded media with the archive made by deploy/export-content.sh.
 # The current data is saved first in backups/pre-import-<date>.tar.gz.
 set -eu
@@ -20,7 +20,7 @@ DIR=$(cd "$(dirname "$ARCHIVE")" && pwd)
 NAME=$(basename "$ARCHIVE")
 STAMP=$(date +%Y-%m-%d-%H%M)
 mkdir -p backups
-C="docker compose --env-file $FILE"
+C="${COMPOSE:-docker compose} --env-file $FILE -f docker-compose.yml"
 
 $C build app
 $C stop app 2>/dev/null || true
@@ -33,4 +33,4 @@ $C run --rm --no-deps -T -v "$DIR:/import:ro" -v "$PWD/backups:/backups" --entry
   echo 'Imported: database + media'
 "
 $C up -d
-echo "Started. Check: ./deploy/deploy.sh $ENV (rebuild + health check) or $C logs -f app"
+echo "Started. Check: make wait ENV=$ENV   (or: make logs ENV=$ENV)"
