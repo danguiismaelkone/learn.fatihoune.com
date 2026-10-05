@@ -1,7 +1,9 @@
-# FATIHOUNE Formation — deployment on one small VPS.
-#   Pre-production : docker compose --env-file .env.preprod up -d --build
-#   Production     : docker compose --env-file .env.production up -d --build
-# Full procedure: project/6-build/DEPLOY.md
+# FATIHOUNE Formation — deployment with Docker Compose.
+#   Pre-production : ./deploy/deploy.sh preprod      (or: docker compose --env-file .env.preprod up -d --build)
+#   Production     : ./deploy/deploy.sh production
+# Default: the app listens on APP_BIND:APP_PORT and an existing reverse proxy (Nginx Proxy Manager) terminates HTTPS.
+# Server without a reverse proxy: add COMPOSE_PROFILES=caddy to the .env file to start the bundled Caddy on 80/443.
+# Full procedure: deploy/README.md
 name: fatihoune-${SITE_ENV:-preview}
 
 services:
@@ -21,15 +23,20 @@ services:
       - data:/data
     expose:
       - '3000'
+    # Published on the Docker bridge address only: reachable by the reverse proxy container, not from the internet
+    # (Docker bypasses ufw, so 0.0.0.0 would expose plain HTTP publicly).
+    ports:
+      - '${APP_BIND:-172.17.0.1}:${APP_PORT:?APP_PORT is required (a free port on the server, e.g. 3010)}:3000'
 
   caddy:
     image: caddy:2.10-alpine
+    profiles: ['caddy']
     restart: unless-stopped
     ports:
       - '${HTTP_PORT:-80}:80'
       - '${HTTPS_PORT:-443}:443'
     environment:
-      SITE_DOMAIN: ${SITE_DOMAIN:?SITE_DOMAIN is required}
+      SITE_DOMAIN: ${SITE_DOMAIN:-}
     volumes:
       - ./deploy/${CADDYFILE:-Caddyfile.preprod}:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
