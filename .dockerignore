@@ -6,6 +6,8 @@
 *.db-journal
 media/
 backups/
+content-export/
+content-import/
 node_modules/
 .next/
 .git/

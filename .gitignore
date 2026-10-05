@@ -57,3 +57,8 @@ node_modules/
 /backups
 .env.preprod
 .env.production
+
+# deployment
+/backups/
+/content-export/
+/content-import/
