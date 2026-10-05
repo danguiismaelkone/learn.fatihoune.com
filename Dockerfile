@@ -1,7 +1,12 @@
 # FATIHOUNE Formation — single image: Next.js + Payload + SQLite.
-# Build once per environment (pre-production / production): see docker-compose.yml and project/6-build/DEPLOY.md.
+# Build once per environment (pre-production / production): see docker-compose.yml and deploy/README.md.
 FROM node:22-alpine AS base
-RUN apk add --no-cache libc6-compat && corepack enable
+# pnpm is fetched once here, in a cache readable by every user: the runtime user (nextjs) would otherwise
+# download it from the npm registry on each container start (and fail to start without internet access).
+# Version: keep in sync with "packageManager" in package.json.
+ENV COREPACK_HOME=/opt/corepack COREPACK_ENABLE_DOWNLOAD_PROMPT=0
+RUN apk add --no-cache libc6-compat && corepack enable && corepack prepare pnpm@10.30.0 --activate \
+    && chmod -R a+rX /opt/corepack
 WORKDIR /app
 
 FROM base AS deps
@@ -23,12 +28,16 @@ RUN export DATABASE_URL=file:/tmp/build.db PAYLOAD_SECRET=build-only-secret MEDI
 
 FROM base AS runner
 ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 PORT=3000 HOSTNAME=0.0.0.0
+# Never reach the registry at runtime: pnpm comes from the cache prepared above.
+ENV COREPACK_ENABLE_NETWORK=0
 RUN apk add --no-cache wget && addgroup -S nodejs -g 1001 && adduser -S nextjs -u 1001 -G nodejs
 COPY --from=builder --chown=nextjs:nodejs /app ./
 RUN mkdir -p /data/media && chown -R nextjs:nodejs /data
 USER nextjs
 EXPOSE 3000
-HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
+# The first start creates the database and imports the content: about 4 minutes on a slow disk (2026-10-05).
+# Failures during the 10-minute start period are not counted; it ends as soon as the site answers.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10m --retries=3 \
   CMD wget -qO- http://127.0.0.1:3000/healthz >/dev/null || exit 1
 # Apply pending migrations, import the validated content into an empty database (first start only), then start.
 CMD ["sh", "-c", "pnpm payload migrate && pnpm seed:if-empty && pnpm start"]
