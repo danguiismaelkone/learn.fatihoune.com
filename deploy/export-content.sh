@@ -1,6 +1,6 @@
 #!/bin/sh
 # Run on the machine where content was entered (local development), from website/site.
-# Usage: ./deploy/export-content.sh
+# Usage: make export-content   (or ./deploy/export-content.sh)
 # Produces content-export/fatihoune-content-<date>.tar.gz (database + uploaded media) for deploy/import-content.sh.
 #
 # A development database is kept in sync by schema push, so it records no migrations. Copied as-is, the
@@ -51,4 +51,4 @@ echo "4/4 Packaging database + media"
 cp -R "$MEDIA" "$WORK/pkg/media"
 OUT="content-export/fatihoune-content-$STAMP.tar.gz"
 tar -czf "$OUT" -C "$WORK/pkg" fatihoune.db media
-echo "Done: $OUT ($(du -h "$OUT" | cut -f1)). Upload it to the server (FTP/scp) into website/site/content-import/."
+echo "Done: $OUT ($(du -h "$OUT" | cut -f1)). Upload it to the server (FTP/scp) into content-import/ (in the cloned folder)."
